@@ -1,0 +1,7 @@
+code,name_en,name_mr,is_restricted
+general,General Fund,सर्वसाधारण निधी,false
+corona-crisis,Corona Crisis Fund,कोरोना संकट निधी,true
+raigad-relief,Raigad Relief Fund,रायगड मदत निधी,true
+flood-relief,Flood Relief,पूरग्रस्त मदत,true
+csr,CSR Grants,सीएसआर अनुदान,true
+earmarked-donor,Earmarked Donor Accounts,विशिष्ट उद्देश देणगी खाते,true
