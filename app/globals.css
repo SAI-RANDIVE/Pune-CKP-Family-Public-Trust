@@ -1,0 +1,369 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-display: 'Yatra One', serif;
+  --font-body: 'Poppins', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-image:
+    radial-gradient(circle at 8% 12%, rgba(244, 166, 44, 0.10), transparent 40%),
+    radial-gradient(circle at 94% 6%, rgba(211, 0, 0, 0.06), transparent 35%);
+}
+
+.soft-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.soft-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px -25px rgba(211, 0, 0, 0.35);
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.soft-reveal {
+  animation: fadeUp 0.7s ease-out both;
+}
+
+/* ---------------------------------------------------------------------
+   Scroll reveal. The pending (hidden) state is only ever set by JS via the
+   data attribute, so with JS off or an observer failure the content simply
+   stays visible — it is never hidden by CSS alone.
+   --------------------------------------------------------------------- */
+[data-reveal] {
+  transition: opacity 0.65s ease-out, transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+
+[data-reveal='pending'] {
+  opacity: 0;
+  transform: translateY(22px);
+}
+
+[data-reveal='in'] {
+  opacity: 1;
+  transform: none;
+  will-change: auto;
+}
+
+/* Warm cream-to-white wash used to transition between stacked sections */
+.section-wash {
+  background-image: linear-gradient(180deg, rgba(253, 245, 231, 0) 0%, rgba(248, 236, 212, 0.55) 45%, rgba(253, 245, 231, 0) 100%);
+}
+
+/* Teal-free, on-brand hero gradient: saffron warmth over cream */
+.hero-wash {
+  background-image:
+    radial-gradient(ellipse 70% 60% at 15% 0%, rgba(244, 166, 44, 0.22), transparent 60%),
+    radial-gradient(ellipse 60% 50% at 95% 10%, rgba(211, 0, 0, 0.10), transparent 55%),
+    linear-gradient(180deg, #FDF5E7 0%, #FFFFFF 100%);
+}
+
+/* Animated underline for nav and inline links */
+.link-underline {
+  position: relative;
+}
+
+.link-underline::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  width: 100%;
+  height: 2px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.link-underline:hover::after,
+.link-underline:focus-visible::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Press feedback on primary buttons */
+.btn-press {
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.18s ease, background-color 0.2s ease;
+}
+
+.btn-press:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px -16px rgba(211, 0, 0, 0.6);
+}
+
+.btn-press:active {
+  transform: translateY(0);
+}
+
+/* Medallions lift and catch the light on hover */
+.medallion-hover {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease;
+}
+
+.medallion-hover:hover {
+  transform: translateY(-5px) rotate(-2deg);
+}
+
+/* ---------------------------------------------------------------------
+   Membership tier cards — each tier gets its own metal treatment.
+   --------------------------------------------------------------------- */
+.membership-card {
+  position: relative;
+  isolation: isolate;
+}
+
+.membership-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.85;
+}
+
+.membership-card--silver {
+  border-color: #cfcfca;
+  background-image: linear-gradient(135deg, #ffffff 0%, #f4f4f2 45%, #e3e3df 100%);
+}
+
+.membership-card--gold {
+  border-color: #F4A62C;
+  background-image: linear-gradient(135deg, #FFFDF8 0%, #FEF6E8 40%, #F9D693 100%);
+}
+
+.membership-card--platinum {
+  border-color: #8A0000;
+  background-image: linear-gradient(135deg, #FFFDF8 0%, #FBE3C9 35%, #F0C98A 70%, #E8D9C5 100%);
+}
+
+/* A slow specular sweep across a medallion — reads as struck metal */
+@keyframes badgeShine {
+  0%   { transform: translateX(-120%) rotate(18deg); }
+  55%  { transform: translateX(240%) rotate(18deg); }
+  100% { transform: translateX(240%) rotate(18deg); }
+}
+
+.badge-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.badge-shine::before {
+  content: '';
+  position: absolute;
+  top: -40%;
+  left: 0;
+  width: 45%;
+  height: 180%;
+  background-image: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
+  animation: badgeShine 4.5s ease-in-out infinite;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Entrance pop for confirmation states */
+@keyframes revealPop {
+  0%   { opacity: 0; transform: scale(0.94) translateY(12px); }
+  60%  { opacity: 1; transform: scale(1.015) translateY(0); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.reveal-pop {
+  animation: revealPop 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Gentle float, for hero ornaments */
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+
+.float-slow { animation: floatY 6s ease-in-out infinite; }
+.float-slower { animation: floatY 8.5s ease-in-out infinite; }
+
+/* Animated brand gradient for feature panels */
+@keyframes gradientDrift {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+
+.gradient-drift {
+  background-size: 200% 200%;
+  animation: gradientDrift 14s ease infinite;
+}
+
+/* Table row + list hover affordance */
+.row-hover {
+  transition: background-color 0.18s ease, transform 0.18s ease;
+}
+
+.row-hover:hover {
+  background-color: rgba(244, 166, 44, 0.08);
+}
+
+/* Skeleton shimmer for async content */
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: #F0DEB8;
+  border-radius: 0.75rem;
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.65), transparent);
+  animation: shimmer 1.6s infinite;
+}
+
+/* Focus ring that is visible against both cream and vermilion backgrounds */
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 3px solid #D30000;
+  outline-offset: 2px;
+  border-radius: 0.375rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .soft-card,
+  .soft-reveal,
+  [data-reveal],
+  .link-underline::after,
+  .btn-press,
+  .medallion-hover,
+  .reveal-pop,
+  .float-slow,
+  .float-slower,
+  .gradient-drift,
+  .row-hover {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* Decorative-only effects are removed entirely rather than frozen mid-sweep. */
+  .badge-shine::before {
+    display: none;
+  }
+
+  /* Whatever state JS left it in, reduced-motion users see the content. */
+  [data-reveal],
+  [data-reveal='pending'] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .skeleton::after {
+    animation: none;
+  }
+}
+
+::selection {
+  background: #F4A62C;
+  color: #2B1A0E;
+}
+
+/* ---------------------------------------------------------------------
+   The "Gaurav medallion" — the trust's own visual language (its Gaurav
+   Sohala award ceremonies) turned into the site's signature element:
+   a struck medal with a ribbon, used for membership tiers and stats.
+   --------------------------------------------------------------------- */
+.medallion {
+  position: relative;
+  width: 7rem;
+  height: 7rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid rgba(43, 26, 14, 0.15);
+  box-shadow:
+    0 0 0 4px rgba(253, 245, 231, 0.9),
+    0 10px 24px -8px rgba(211, 0, 0, 0.35),
+    inset 0 2px 6px rgba(255, 255, 255, 0.5),
+    inset 0 -6px 12px rgba(0, 0, 0, 0.12);
+}
+
+.medallion::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: 9999px;
+  border: 1.5px dashed rgba(43, 26, 14, 0.25);
+}
+
+.medallion-ribbon {
+  position: absolute;
+  bottom: -1.1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2.6rem;
+  height: 1.6rem;
+  clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);
+}
+
+.medallion--silver {
+  background: linear-gradient(155deg, #f4f4f2, #cfcfca 55%, #a9a9a2);
+}
+.medallion--silver .medallion-ribbon { background: #b00000; }
+
+.medallion--gold {
+  background: linear-gradient(155deg, #ffe7b0, #F4A62C 55%, #b0700f);
+}
+.medallion--gold .medallion-ribbon { background: #8a0000; }
+
+.medallion--platinum {
+  background: linear-gradient(155deg, #fbe3c9, #f0c98a 40%, #2B1A0E 130%);
+}
+.medallion--platinum .medallion-ribbon { background: #D30000; }
+
+.medallion-stat {
+  background: linear-gradient(155deg, #FEF6E8, #F4A62C 120%);
+  width: 5.5rem;
+  height: 5.5rem;
+}
+
+/* Torn-paper style divider used between sections, evokes an award citation card */
+.citation-divider {
+  height: 3px;
+  background-image: repeating-linear-gradient(90deg, #D30000 0 10px, transparent 10px 20px);
+  opacity: 0.55;
+}
+
+.container-page {
+  max-width: 72rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+.devanagari {
+  line-height: 1.8;
+}

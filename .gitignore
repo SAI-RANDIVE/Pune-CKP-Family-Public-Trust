@@ -1,0 +1,17 @@
+node_modules/
+.next/
+.env
+.env.local
+.DS_Store
+npm-debug.log*
+
+# Trust source archive and migration outputs - personal and financial data, never commit
+05. Trust - various xl sheets/
+data-migration/reports/
+data-migration/logs/
+data-migration/tmp/
+build-output.log
+
+data-migration/staging/
+__pycache__/
+*.pyc

@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: pune-ckp-trust-web
+    env: node
+    rootDir: .
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        sync: false
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: NEXT_PUBLIC_RAZORPAY_KEY_ID
+        sync: false
+      - key: NEXT_PUBLIC_TRUST_NAME
+        value: Pune CKP Family Public Trust
+      - key: NEXT_PUBLIC_TRUST_REG_NO
+        value: E-8167, Dated: 14th May 2018
+      - key: NEXT_PUBLIC_TRUST_PAN
+        value: AADTP7440A
+      - key: NEXT_PUBLIC_TRUST_ADDRESS
+        value: 602, Niranka CHS, Ideal Society, Paud Road, Kothrud, Pune - 411038
+      - key: NEXT_PUBLIC_TRUST_PHONE
+        value: 7447794477
+      - key: NEXT_PUBLIC_TRUST_EMAIL
+        value: puneckpfamily@gmail.com
+      - key: NEXT_PUBLIC_TRUST_WEBSITE
+        value: https://puneckptrust.in
