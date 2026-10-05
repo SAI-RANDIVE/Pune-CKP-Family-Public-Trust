@@ -124,3 +124,73 @@ lib/                 db.js, pricing.js, razorpay.js, receipt.js, sequences.js, n
 sql/schema.sql       Neon table definitions
 scripts/init-db.js   Runs schema.sql for you
 ```
+
+---
+
+## Trust Management System (admin.puneckptrust.in)
+
+One project serves two sites. `middleware.js` decides by host name:
+
+| Host | What it serves |
+|---|---|
+| `puneckptrust.in` | The public website (`app/(site)`). Every management-system address returns "not found" here. |
+| `admin.puneckptrust.in` | The Trust Management System (`app/tms`, `app/api/tms`). Sign-in required, never indexed. |
+
+Locally: public site at `http://localhost:3000`, management system at `http://admin.localhost:3000`.
+
+### Set-up
+
+```bash
+npm install
+npm run db:migrate            # applies sql/schema.sql and sql/NNN-*.sql in order (add --dry-run to preview)
+npm run admin:create          # asks for name, e-mail, role and password; nothing is hard-coded
+npm run dev
+```
+
+Roles: `super_admin` > `admin` > `accountant` > `viewer`. Editing or removing money entries, merging
+people, role changes, exports and backups ask for a six-digit code sent to the user's e-mail, and every
+change is written to the audit log (Settings > Audit log).
+
+### Deploying both hosts (Vercel)
+
+1. Add `puneckptrust.in`, `www.puneckptrust.in` and `admin.puneckptrust.in` to the same Vercel project.
+2. Set every variable from `.env.example` in Vercel, including `NEXT_PUBLIC_ADMIN_HOST` and `NEXT_PUBLIC_TRUST_WEBSITE`.
+3. Run `npm run db:migrate` against the production database, then `npm run admin:create`.
+
+### IDs
+
+Every record gets one uniform, searchable ID, issued in order and never reused (`lib/ids.js`):
+`SLV/MEM/0001`, `GLD/MEM/0001`, `PLT/MEM/0001` (members), `PCFPT/PER/00001` (people),
+`PCFPT/DON/2026-27/0001` (donations; also `MFE`, `SPN`, `ADV`, `EVF`, `CSR`, `BKS`, `INT`),
+`PCFPT/RCP/2026-27/0001` (receipts), `PCFPT/EXP/...` (expenses), `PCFPT/FD/0001` (deposits).
+Typing any ID, old or new, into Search opens the record.
+
+### Importing the old registers
+
+The original Excel files are never changed. The pipeline in `data-migration/etl` reads them, records the
+file, sheet and row every figure came from, and loads the result in one transaction:
+
+```bash
+python data-migration/etl/10_extract.py      # workbooks -> staging
+python data-migration/etl/25_people.py       # one record per person; uncertain matches go to review
+python data-migration/etl/30_validate.py
+python data-migration/etl/40_load.py --dry-run
+python data-migration/etl/40_load.py         # --rollback <batch> undoes a load
+python data-migration/etl/50_reconcile.py
+```
+
+Reports are written to `data-migration/reports/` (not committed: they contain personal data).
+
+### Photographs
+
+Gallery photos are served from the old website until they are copied locally:
+
+```bash
+node scripts/fetch-old-images.js             # downloads into public/gallery/<album>/image1.jpg ...
+```
+
+### Checking the receipt layout
+
+```bash
+node scripts/receipt-sample.mjs              # writes three sample receipts, including a worst case
+```
