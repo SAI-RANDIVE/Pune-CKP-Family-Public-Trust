@@ -120,13 +120,11 @@ def main():
         md.append(f"Raw source rows stored: {n_raw}. Links from records to source rows: {n_links}.\n")
 
         # ---- C. printed year-end sheet
-        md.append("## C. Printed receipts-and-payments sheets
-")
+        md.append("## C. Printed receipts-and-payments sheets\n")
         md.append("The printed inward and outward totals of each year are stored line by line as reconciliation targets "
                   "(validation report, section 7). They mix bank and petty-cash movements in a way that differs from year "
                   "to year, so the books are checked against the bank statements instead (sections D and E), which is the "
-                  "stricter test.
-")
+                  "stricter test.\n")
 
         # ---- D. printed closing bank balance vs bank statement
         md.append("## D. Printed closing bank balance against the bank statement\n")
