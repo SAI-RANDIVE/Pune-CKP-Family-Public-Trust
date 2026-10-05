@@ -18,3 +18,4 @@ __pycache__/
 
 # Scrape of the old site: source material only, large, not part of the project
 docs/old-site-scrape/
+.receipt-sample-*/
