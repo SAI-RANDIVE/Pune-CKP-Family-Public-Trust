@@ -113,13 +113,15 @@ export async function POST(req) {
       `insert into payments
         (member_id, payment_kind, membership_type, amount, currency, razorpay_order_id, status,
          towards, valid_till, payer_name, payer_phone, payer_email, payer_address, amount_in_words,
-         email_verified, verification_id)
-       values ($1,$2,$3,$4,'INR',$5,'created',$6,$7,$8,$9,$10,$11,$12,true,$13)
+         email_verified, verification_id, is_test)
+       values ($1,$2,$3,$4,'INR',$5,'created',$6,$7,$8,$9,$10,$11,$12,true,$13,$14)
        returning id`,
       [
         memberId, paymentKind, membershipType, amount, order.id,
         towards, validTill, payer.name, payer.phone, payer.email, payer.address,
         `${rupeesToWords(amount)} Only`, verification.verificationId,
+        // Test-mode payments are kept for checking the flow but never counted as trust income.
+        String(process.env.RAZORPAY_KEY_ID || '').startsWith('rzp_test_'),
       ]
     );
 
