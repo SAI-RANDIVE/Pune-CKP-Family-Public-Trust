@@ -293,6 +293,7 @@ class Loader:
                     row["import_batch_id"] = self.batch
                 if "origin" in dbcols:
                     row["origin"] = "import"
+                extra = {}
                 for k, v in rec.items():
                     if k in DROP_FIELDS or k == "_domain" or v is None:
                         continue
@@ -309,7 +310,9 @@ class Loader:
                             continue
                         row[col] = self.ref[kind][v]
                     elif k not in dbcols:
-                        self.problems.append(f"{table}: unknown column '{k}' (first seen in {rec['_key']})")
+                        # no typed column: keep the value verbatim rather than drop it
+                        extra[k] = v
+                        self.counts[f"{table}: kept in source_extra: {k}"] += 1
                     elif k in MONEY_COLS:
                         if not MONEY_RE.match(str(v)):
                             self.problems.append(f"{table} {rec['_key']}: {k}={v!r} is not a 2-decimal amount")
@@ -320,6 +323,8 @@ class Loader:
                         row[k] = Jsonb(v)
                     else:
                         row[k] = v
+                if extra:
+                    row["source_extra"] = Jsonb(extra)
                 pkey = mention.get((table, rec["_key"]))
                 if pkey:
                     row[PERSON_COL.get(table, "person_id")] = rid("people", pkey)

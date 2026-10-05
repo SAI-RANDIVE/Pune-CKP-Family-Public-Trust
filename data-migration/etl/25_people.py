@@ -142,8 +142,8 @@ def build_people(mentions, dsu):
     groups = defaultdict(list)
     for i, m in enumerate(mentions):
         groups[dsu.find(i)].append(m)
-    people, mention_map, issues = [], [], []
-    for group in groups.values():
+    people, mention_map, issues, used = [], [], [], set()
+    for _, group in sorted(groups.items()):
         group.sort(key=lambda m: (ROLE_RANK.get(m["role"], 9), m["domain"], m["key"]))
         hints = sorted(h for h in _vals(group, "hint"))
         pans = sorted(_vals(group, "pan"))
@@ -152,6 +152,12 @@ def build_people(mentions, dsu):
         anchor = (hints[0] if hints else pans[0] if pans
                   else f"{nks.most_common(1)[0][0]}|{phones[0] if phones else ''}")
         key = "per:" + fingerprint(anchor)[:14]
+        if key in used:
+            # Two people the rules refused to merge (same name, conflicting details) share
+            # an anchor: tell them apart by the first record that mentions each.
+            first_mention = min(f"{m['table']}:{m['key']}" for m in group)
+            key = "per:" + fingerprint(anchor, first_mention)[:14]
+        used.add(key)
         names = Counter(m["name"] for m in group)
         latin = [n for n, _ in names.most_common() if not is_devanagari(n)]
         deva = [n for n, _ in names.most_common() if is_devanagari(n)]

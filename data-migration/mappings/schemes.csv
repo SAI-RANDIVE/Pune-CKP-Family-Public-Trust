@@ -1,11 +1,12 @@
 slug,name_en,name_mr,is_repayable,description
-dnyan-kiran,Dnyan Kiran Vidyarthi Sahayy Yojana,ज्ञान किरण विद्यार्थी साहाय्य योजना,false,Student scholarships
-gurukul-support,Gurukul Support (Talegaon),गुरुकुल साहाय्य (तळेगाव),false,Support to the Gurukul at Talegaon
+dnyan-kiran,Dnyan Kiran Vidyarthi Sahayy Yojana,ज्ञानकिरण विद्यार्थी सहाय्य योजना,false,Student scholarships
+gurukul-support,Gurukul Support (Talegaon),गुरुकुल साहाय्य (तळेगाव),false,Support to the Gurukul at Talegaon (written SVDS Gurukul / Swatantryaveer Savarkar Gurukul)
 niramay,Niramay Aarogya Seva,निरामय आरोग्य सेवा,false,Health support
 medical-aid,Repayable Medical Aid,परतफेडीची वैद्यकीय मदत,true,Interest-free medical aid repaid in instalments
-project-diya,Project Diya,प्रकल्प दिया,false,
+project-diya,Project Diya,प्रकल्प दिया,false,"Cycle repairs; one payment found (11,000 on 5 May 2024)"
 udaan,Udaan,उडान,false,Named in the brief; no records found in the archive
-blossoming-buds,Project Blossoming Buds,प्रकल्प ब्लॉसमिंग बड्स,false,
-amrut-dhara,Project Amrut Dhara,प्रकल्प अमृतधारा,false,
-ravikiran,Project Ravikiran,प्रकल्प रविकिरण,false,
+blossoming-buds,Project Blossoming Buds,प्रकल्प ब्लॉसमिंग बड्स,false,"15 schools, 2000+ girl students; summary lines for 2025-26 and 2026-27"
+amrut-dhara,Project Amrut Dhara,प्रकल्प अमृतधारा,false,Solar water purification; listed as upcoming for 2025-26
+ravikiran,Project Ravikiran,प्रकल्प रविकिरण,false,Solar energy; listed as upcoming for 2025-26
 tree-plantation,Tree Plantation,वृक्षारोपण,false,
+project-aarambh,Project Aarambh,प्रकल्प आरंभ,false,"Special initiative; one undated summary line (450,000), no detail"

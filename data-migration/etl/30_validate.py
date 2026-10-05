@@ -289,12 +289,13 @@ def main():
                     [[e, inr(v["income"]), inr(v["expense"]), inr(v["income"] - v["expense"]), inr(v["memo"])] for e, v in sorted(ev.items(), key=lambda kv: str(kv[0]))]))
     sc = defaultdict(lambda: [0, 0, Decimal(0)])
     for d in data.get("scheme_disbursements", []):
-        s = sc[(d.get("scheme_slug"), d.get("fy") or "undated")]
+        s = sc[(d.get("scheme_slug"), d.get("fy") or "undated", d.get("status") or "paid")]
         s[0] += 1
         s[1] += d.get("beneficiary_count") or 1
         s[2] += Decimal(d["amount"])
-    md.append(table(["Scheme", "FY", "Disbursement records", "Beneficiaries", "Amount"],
-                    [[s, fy, n, b, inr(t)] for (s, fy), (n, b, t) in sorted(sc.items(), key=lambda kv: (str(kv[0][0]), kv[0][1]))]))
+    md.append(table(["Scheme", "FY", "Status", "Records", "Beneficiaries (1 where no head-count is given)", "Amount"],
+                    [[s, fy, stt, n, b, inr(t)] for (s, fy, stt), (n, b, t) in sorted(sc.items(), key=lambda kv: (str(kv[0][0]), kv[0][1], kv[0][2]))]))
+    md.append("`planned` rows are projects the source lists as upcoming; they are stored but never counted as paid.\n")
 
     # 11. review queue
     md.append("## 12. Items waiting for a human decision\n")

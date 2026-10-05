@@ -90,7 +90,7 @@ columns are replaced by the cross-reference fields above and by `person`.
 - `investments`: kind, name, folio, notes; `investment_transactions`: investment_key, txn_date, fy, kind, amount, units
 - `scheme_applications`: scheme_slug, person, applicant_as_written, fy, applied_on, institution, status, details
 - `scheme_disbursements`: scheme_slug, person, beneficiary_as_written, beneficiary_count, fy,
-  disbursed_on, amount, institution, is_repayable, notes, needs_review
+  disbursed_on, amount, institution, is_repayable, status (paid | planned), notes, needs_review
 - `scheme_repayments`: disbursement_key, paid_on, amount
 - `budgets`: fy, event_slug, title, heading_as_written; `budget_lines`: budget_key, kind, category_code, head_as_written, amount
 - `annual_statements`: fy, entity (trust | pre_trust), source_label, is_signed_audit, notes
