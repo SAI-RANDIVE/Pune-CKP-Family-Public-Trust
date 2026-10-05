@@ -1,54 +1,55 @@
 import Link from 'next/link';
-import Breadcrumbs from './Breadcrumbs';
+import PageHero from './PageHero';
 import Reveal from './Reveal';
 
 /**
  * Shared shell for the policy pages (terms, privacy, refunds). Keeps their
- * structure and tone identical so the trust reads as one organisation —
+ * structure and tone identical so the trust reads as one organisation,
  * and so there is exactly one place to change the house style.
  */
 export default function LegalPage({ label, title, intro, updated, sections, breadcrumbLabel }) {
   return (
-    <div className="container-page py-16 md:py-24">
-      <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: breadcrumbLabel || title }]} />
+    <>
+      <PageHero
+        eyebrow={label}
+        title={title}
+        intro={intro}
+        breadcrumbs={[{ label: breadcrumbLabel || title }]}
+        meta={<p className="font-mono text-xs text-ink/65">Last updated: {updated}</p>}
+      />
 
-      <Reveal>
-        <p className="text-xs font-semibold tracking-[0.25em] uppercase text-vermilion-600 text-center">{label}</p>
-        <h1 className="font-display text-4xl md:text-5xl text-center mt-3">{title}</h1>
-        <p className="max-w-2xl mx-auto mt-5 text-center text-ink/70 leading-relaxed">{intro}</p>
-        <p className="text-center text-xs text-ink/50 mt-4 font-mono">Last updated: {updated}</p>
-      </Reveal>
-
-      <div className="max-w-3xl mx-auto mt-14 space-y-6">
-        {sections.map((section, i) => (
-          <Reveal key={section.heading} delay={i * 50}>
-            <section className="bg-cream-100 border border-saffron-200/70 rounded-2xl p-7">
-              <h2 className="font-display text-xl text-vermilion-700">{section.heading}</h2>
-              {section.body.map((paragraph, j) => (
-                <p key={j} className="text-sm text-ink/75 mt-3 leading-relaxed">{paragraph}</p>
-              ))}
-              {section.list && (
-                <ul className="mt-4 space-y-2">
-                  {section.list.map((item) => (
-                    <li key={item} className="text-sm text-ink/70 leading-relaxed flex gap-2">
-                      <span className="text-vermilion-500 mt-1">•</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </section>
-          </Reveal>
-        ))}
-      </div>
-
-      <Reveal delay={120} className="mt-14 text-center">
-        <p className="text-sm text-ink/70">Questions about this policy?</p>
-        <div className="flex flex-wrap justify-center gap-3 mt-5">
-          <Link href="/contact" className="btn-press rounded-full bg-vermilion-500 text-cream-100 px-6 py-3 font-semibold hover:bg-vermilion-600">Contact the Trust</Link>
-          <Link href="/faq" className="btn-press rounded-full border-2 border-vermilion-500 text-vermilion-600 px-6 py-3 font-semibold hover:bg-vermilion-50">Read the FAQ</Link>
+      <div className="container-page section-y">
+        <div className="mx-auto max-w-3xl space-y-5">
+          {sections.map((section, i) => (
+            <Reveal key={section.heading} delay={Math.min(i, 3) * 50}>
+              <section className="card p-6 sm:p-7">
+                <h2 className="h-card">{section.heading}</h2>
+                {section.body.map((paragraph, j) => (
+                  <p key={j} className="mt-3 text-sm leading-relaxed text-ink/80">{paragraph}</p>
+                ))}
+                {section.list && (
+                  <ul className="mt-4 space-y-2">
+                    {section.list.map((item) => (
+                      <li key={item} className="flex gap-2 text-sm leading-relaxed text-ink/75">
+                        <span className="mt-1 text-vermilion-500" aria-hidden="true">•</span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+            </Reveal>
+          ))}
         </div>
-      </Reveal>
-    </div>
+
+        <Reveal delay={120} className="mt-12 text-center">
+          <p className="text-sm text-ink/75">Questions about this policy?</p>
+          <div className="mt-5 flex flex-wrap justify-center gap-3">
+            <Link href="/contact" className="btn btn-primary">Contact the trust</Link>
+            <Link href="/faq" className="btn btn-outline">Read the FAQ</Link>
+          </div>
+        </Reveal>
+      </div>
+    </>
   );
 }

@@ -3,20 +3,20 @@
 import { useEffect, useRef } from 'react';
 
 /**
- * Scroll-triggered reveal.
+ * Scroll-triggered reveals.
  *
- * Safety rules this component follows, because the site is content-first:
+ * Safety rules these components follow, because the site is content-first:
  *  - Children are always server-rendered, so the text is in the raw HTML for
  *    crawlers and answer engines whether or not this ever animates.
- *  - The hidden state is applied *by JS only* (`data-reveal="pending"`). If JS
- *    never runs, the CSS selector never matches and content stays visible.
+ *  - The hidden state is applied *by JS only* (a data attribute). If JS never
+ *    runs, the CSS selector never matches and content stays visible.
+ *  - Anything already on screen when the page hydrates is left alone, so there
+ *    is no visible -> hidden -> visible flicker above the fold.
  *  - `prefers-reduced-motion` short-circuits the whole thing.
- *  - A failsafe timer reveals everything after 1.2s even if IntersectionObserver
- *    never fires, so content can't get stranded invisible.
+ *  - If IntersectionObserver never reports at all, everything is revealed.
+ *  - Only opacity and transform change, so nothing shifts layout.
  */
-export default function Reveal({ children, as: Tag = 'div', delay = 0, className = '' }) {
-  const ref = useRef(null);
-
+function useReveal(ref, attribute, delay) {
   useEffect(() => {
     const node = ref.current;
     if (!node) return undefined;
@@ -24,15 +24,29 @@ export default function Reveal({ children, as: Tag = 'div', delay = 0, className
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
     if (reduced.matches || typeof IntersectionObserver === 'undefined') return undefined;
 
-    node.dataset.reveal = 'pending';
+    // Already visible at hydration: do not hide what the visitor is reading.
+    const rect = node.getBoundingClientRect();
+    if (rect.top < window.innerHeight * 0.92) return undefined;
+
+    node.setAttribute(attribute, 'pending');
     if (delay) node.style.transitionDelay = `${delay}ms`;
 
-    const show = () => { node.dataset.reveal = 'in'; };
+    let heard = false;
+    let cleanup;
 
-    // Already on screen at mount (above the fold): reveal on the next frame so
-    // the transition still plays rather than snapping.
+    const show = () => {
+      node.setAttribute(attribute, 'in');
+      // Hand the element back untouched once the transition is over, so its own
+      // hover/focus transitions are not slowed or delayed by ours.
+      cleanup = window.setTimeout(() => {
+        node.removeAttribute(attribute);
+        node.style.transitionDelay = '';
+      }, 1500 + delay);
+    };
+
     const observer = new IntersectionObserver(
       (entries) => {
+        heard = true;
         entries.forEach((entry) => {
           if (!entry.isIntersecting) return;
           show();
@@ -43,16 +57,43 @@ export default function Reveal({ children, as: Tag = 'div', delay = 0, className
     );
     observer.observe(node);
 
-    const failsafe = window.setTimeout(show, 1200);
+    const failsafe = window.setTimeout(() => { if (!heard) show(); }, 2500);
 
     return () => {
       observer.disconnect();
       window.clearTimeout(failsafe);
+      window.clearTimeout(cleanup);
+      node.removeAttribute(attribute);
+      node.style.transitionDelay = '';
     };
-  }, [delay]);
+  }, [ref, attribute, delay]);
+}
+
+/**
+ * Reveal one block. `variant`: 'up' (default), 'pop' (scale-in), 'left',
+ * 'right' or 'fade'.
+ */
+export default function Reveal({ children, as: Tag = 'div', delay = 0, variant = 'up', className = '', ...rest }) {
+  const ref = useRef(null);
+  useReveal(ref, 'data-reveal', delay);
 
   return (
-    <Tag ref={ref} className={className}>
+    <Tag ref={ref} className={className} data-variant={variant} {...rest}>
+      {children}
+    </Tag>
+  );
+}
+
+/**
+ * Reveal the direct children of a grid one after another (pop-in, 70ms apart)
+ * using a single observer for the whole grid. Cheap enough for long lists.
+ */
+export function Stagger({ children, as: Tag = 'div', className = '', ...rest }) {
+  const ref = useRef(null);
+  useReveal(ref, 'data-stagger', 0);
+
+  return (
+    <Tag ref={ref} className={className} {...rest}>
       {children}
     </Tag>
   );

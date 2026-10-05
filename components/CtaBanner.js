@@ -1,28 +1,49 @@
 import Link from 'next/link';
 import Reveal from './Reveal';
+import AreaIcon from './AreaIcon';
+import { Mandala } from './Motifs';
+import { TRUST } from '../lib/siteData';
 
-export default function CtaBanner() {
+/**
+ * Closing call to action: two clear paths (donate, join) with the plain facts
+ * a donor wants before clicking. Membership fees are the current ones
+ * (Silver 1,000 / Gold 5,000 / Platinum 10,000). No tax-deduction promise.
+ */
+export default function CtaBanner({
+  title = 'Give back to the society that gave to you',
+  text = 'Become a member from ₹1,000 a year, or make a one-time donation of ₹100 to ₹10,000 online. Every payment is receipted instantly.',
+}) {
   return (
-    <Reveal as="section" className="container-page pb-24">
-      <div className="rounded-3xl bg-gradient-to-br from-vermilion-600 to-vermilion-800 px-8 py-14 md:px-16 text-center relative overflow-hidden">
-        <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-saffron-400/20" />
-        <div className="absolute -left-8 -bottom-8 w-32 h-32 rounded-full bg-saffron-400/10" />
-        <h2 className="font-display text-3xl md:text-4xl text-cream-100 relative">
-          <span className="devanagari text-3xl md:text-4xl">समाजाचे देणं समाजालाच द्यावं</span>
-        </h2>
-        <p className="text-cream-100/85 mt-4 max-w-xl mx-auto relative">
-          Become a member for as little as ₹1,000 a year, or make a one-time donation —
-          every contribution is receipted instantly.
-        </p>
-        <div className="mt-8 flex flex-wrap gap-4 justify-center relative">
-          <Link href="/membership" className="btn-press rounded-full bg-saffron-400 text-ink px-7 py-3.5 font-semibold hover:bg-saffron-300">
-            View Membership Plans
-          </Link>
-          <Link href="/donate" className="btn-press rounded-full border-2 border-cream-100 text-cream-100 px-7 py-3.5 font-semibold hover:bg-cream-100 hover:text-vermilion-700">
-            Donate Now
-          </Link>
+    <section className="container-page section-y !pb-0" aria-labelledby="cta-heading">
+      <Reveal variant="pop" className="on-dark panel-vermilion relative overflow-hidden rounded-4xl px-6 py-12 text-center shadow-lift sm:px-10 md:px-16 md:py-16">
+        <div className="motif-rangoli-light pointer-events-none absolute inset-0" aria-hidden="true" />
+        <Mandala spin className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 text-saffron-300/25" />
+        <Mandala className="pointer-events-none absolute -bottom-24 -left-20 h-64 w-64 text-saffron-300/15" />
+
+        <div className="relative">
+          <p className="devanagari text-2xl font-semibold text-saffron-300 md:text-3xl" lang="mr">{TRUST.tagline}</p>
+          <h2 id="cta-heading" className="h-section mx-auto mt-3 max-w-2xl !text-white">{title}</h2>
+          <p className="mx-auto mt-4 max-w-xl text-[0.95rem] leading-relaxed text-cream-200/90">{text}</p>
+
+          <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+            <Link href="/donate" className="btn btn-lg btn-saffron">
+              <AreaIcon name="heart" className="h-5 w-5" />
+              Donate now
+            </Link>
+            <Link href="/membership" className="btn btn-lg btn-light">
+              <AreaIcon name="users" className="h-5 w-5" />
+              Become a member
+            </Link>
+          </div>
+
+          <ul className="mx-auto mt-8 flex max-w-2xl flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-cream-200/85">
+            <li>Registered public trust, Reg. No. {TRUST.regNo}</li>
+            <li>Instant PDF receipt</li>
+            <li>Secure payment by card, UPI or net banking</li>
+            <li><Link href="/donate/bank-transfer" className="underline underline-offset-4 hover:text-white">Bank transfer for larger gifts</Link></li>
+          </ul>
         </div>
-      </div>
-    </Reveal>
+      </Reveal>
+    </section>
   );
 }

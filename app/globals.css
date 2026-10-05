@@ -6,10 +6,13 @@
   --font-display: 'Yatra One', serif;
   --font-body: 'Poppins', sans-serif;
   --font-mono: 'IBM Plex Mono', monospace;
+  --font-devanagari: 'Mukta', 'Noto Sans Devanagari', sans-serif;
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -17,6 +20,196 @@ body {
     radial-gradient(circle at 8% 12%, rgba(244, 166, 44, 0.10), transparent 40%),
     radial-gradient(circle at 94% 6%, rgba(211, 0, 0, 0.06), transparent 35%);
 }
+
+/* =====================================================================
+   Type scale (public site). Fluid sizes, so 320px phones and 1280px
+   desktops both get comfortable headings without breakpoint jumps.
+
+   These live in Tailwind's "components" layer so that a utility class on
+   the same element (text-white, rounded-3xl, mt-0 ...) still wins.
+   ===================================================================== */
+@layer components {
+.eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #B00000;
+}
+
+.h-display {
+  font-family: var(--font-display);
+  font-size: clamp(2.05rem, 5.4vw, 3.9rem);
+  line-height: 1.14;
+  color: #2B1A0E;
+  text-wrap: balance;
+}
+
+.h-page {
+  font-family: var(--font-display);
+  font-size: clamp(1.95rem, 4.4vw, 3.15rem);
+  line-height: 1.16;
+  color: #2B1A0E;
+  text-wrap: balance;
+}
+
+.h-section {
+  font-family: var(--font-display);
+  font-size: clamp(1.55rem, 3vw, 2.35rem);
+  line-height: 1.22;
+  color: #2B1A0E;
+  text-wrap: balance;
+}
+
+.h-card {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  line-height: 1.3;
+  color: #8A0000;
+}
+
+.lead {
+  font-size: clamp(1rem, 1.25vw, 1.125rem);
+  line-height: 1.75;
+  color: rgba(43, 26, 14, 0.76);
+}
+
+.body-copy {
+  font-size: 0.95rem;
+  line-height: 1.75;
+  color: rgba(43, 26, 14, 0.78);
+}
+
+.devanagari {
+  font-family: var(--font-devanagari);
+  line-height: 1.8;
+}
+
+.font-display .devanagari,
+.devanagari.font-display {
+  font-family: var(--font-display);
+}
+
+/* =====================================================================
+   Buttons. Every button is at least 44px tall (tap target).
+   ===================================================================== */
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0.7rem 1.5rem;
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  text-align: center;
+  overflow: hidden;
+  transition: transform 0.2s var(--ease-out-soft), box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.btn:hover { transform: translateY(-2px); }
+.btn:active { transform: translateY(0) scale(0.98); }
+
+.btn-lg { min-height: 3.25rem; padding: 0.9rem 1.9rem; font-size: 1rem; }
+.btn-sm { min-height: 2.75rem; padding: 0.5rem 1.1rem; font-size: 0.875rem; }
+
+.btn-primary { background-color: #D30000; color: #FFFFFF; box-shadow: 0 10px 22px -14px rgba(211, 0, 0, 0.7); }
+.btn-primary:hover { background-color: #B00000; box-shadow: 0 16px 30px -14px rgba(211, 0, 0, 0.75); }
+
+.btn-saffron { background-color: #F4A62C; color: #2B1A0E; box-shadow: 0 10px 22px -14px rgba(176, 109, 16, 0.8); }
+.btn-saffron:hover { background-color: #F7C25F; }
+
+.btn-outline { border-color: #D30000; color: #B00000; background-color: rgba(255, 255, 255, 0.6); }
+.btn-outline:hover { background-color: #FCE8E8; }
+
+.btn-light { border-color: rgba(255, 255, 255, 0.9); color: #FFFFFF; }
+.btn-light:hover { background-color: #FFFFFF; color: #8A0000; }
+
+/* A soft light sweep across filled buttons on hover */
+.btn-primary::after,
+.btn-saffron::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -60%;
+  width: 40%;
+  height: 100%;
+  background-image: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  transform: skewX(-18deg);
+  transition: left 0.55s ease;
+  pointer-events: none;
+}
+
+.btn-primary:hover::after,
+.btn-saffron:hover::after { left: 120%; }
+
+.tap {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+}
+
+/* =====================================================================
+   Cards
+   ===================================================================== */
+.card {
+  background-color: #FFFFFF;
+  border: 1px solid rgba(249, 214, 147, 0.75);
+  border-radius: 1.25rem;
+  box-shadow: 0 1px 2px rgba(43, 26, 14, 0.04), 0 8px 24px -14px rgba(43, 26, 14, 0.16);
+}
+
+.card-hover {
+  transition: transform 0.3s var(--ease-out-soft), box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.card-hover:hover,
+.card-hover:focus-visible {
+  transform: translateY(-5px);
+  border-color: rgba(227, 51, 51, 0.6);
+  box-shadow: 0 2px 4px rgba(43, 26, 14, 0.05), 0 24px 44px -24px rgba(138, 0, 0, 0.38);
+}
+
+.nav-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: 2.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgba(43, 26, 14, 0.82);
+  transition: color 0.2s ease;
+}
+
+.link-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 2.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #B00000;
+}
+
+/* Photo placeholder tone shown while an image loads (no layout shift) */
+.photo-frame {
+  position: relative;
+  overflow: hidden;
+  background-color: #F8ECD4;
+  background-image: radial-gradient(rgba(176, 0, 0, 0.08) 1.2px, transparent 1.4px);
+  background-size: 14px 14px;
+}
+
+.section-y {
+  padding-top: clamp(3.5rem, 7vw, 6rem);
+  padding-bottom: clamp(3.5rem, 7vw, 6rem);
+}
+} /* end @layer components */
 
 .soft-card {
   transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
@@ -27,6 +220,74 @@ body {
   box-shadow: 0 18px 40px -25px rgba(211, 0, 0, 0.35);
 }
 
+/* =====================================================================
+   Maharashtrian motifs, drawn in CSS/SVG only.
+   - toran: the mango-leaf door festoon hung at every celebration
+   - paithani: the zig-zag woven border of a Paithani sari
+   - rangoli: the dotted grid a rangoli is drawn on
+   ===================================================================== */
+.motif-toran {
+  height: 18px;
+  background-repeat: repeat-x;
+  background-size: 36px 18px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='18' viewBox='0 0 36 18'%3E%3Cpath d='M0 0h36v2H0z' fill='%23B00000'/%3E%3Cpath d='M2 2h14L9 16z' fill='%23F4A62C'/%3E%3Cpath d='M20 2h14l-7 11z' fill='%23D30000' fill-opacity='.85'/%3E%3C/svg%3E");
+}
+
+.motif-paithani {
+  height: 10px;
+  background-color: #8A0000;
+  background-image:
+    linear-gradient(135deg, #F4A62C 25%, transparent 25%),
+    linear-gradient(225deg, #F4A62C 25%, transparent 25%),
+    linear-gradient(315deg, #F7C25F 25%, transparent 25%),
+    linear-gradient(45deg, #F7C25F 25%, transparent 25%);
+  background-size: 10px 10px;
+  background-position: -5px 0, -5px 0, 0 0, 0 0;
+}
+
+.motif-rangoli {
+  background-image: radial-gradient(rgba(176, 0, 0, 0.13) 1.2px, transparent 1.4px);
+  background-size: 18px 18px;
+}
+
+.motif-rangoli-light {
+  background-image: radial-gradient(rgba(253, 245, 231, 0.16) 1.2px, transparent 1.4px);
+  background-size: 18px 18px;
+}
+
+.kolam {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  color: #D98A16;
+}
+
+.kolam::before,
+.kolam::after {
+  content: '';
+  height: 1px;
+  width: 3.5rem;
+  background-image: linear-gradient(90deg, transparent, currentColor);
+}
+
+.kolam::after { transform: scaleX(-1); }
+
+.kolam-start { justify-content: flex-start; }
+.kolam-start::before { display: none; }
+
+@keyframes mandalaSpin {
+  to { transform: rotate(360deg); }
+}
+
+.mandala-spin {
+  animation: mandalaSpin 120s linear infinite;
+  transform-origin: center;
+}
+
+/* =====================================================================
+   Entrances that need no JavaScript (hero, page transitions, menus)
+   ===================================================================== */
 @keyframes fadeUp {
   from {
     opacity: 0;
@@ -42,13 +303,52 @@ body {
   animation: fadeUp 0.7s ease-out both;
 }
 
+.hero-rise {
+  animation: fadeUp 0.7s var(--ease-out-soft) both;
+  animation-delay: calc(var(--d, 0) * 1ms);
+}
+
+@keyframes popIn {
+  0%   { opacity: 0; transform: scale(0.86); }
+  70%  { opacity: 1; transform: scale(1.03); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.hero-pop {
+  animation: popIn 0.75s var(--ease-out-soft) both;
+  animation-delay: calc(var(--d, 0) * 1ms);
+}
+
+/* No fill-mode on purpose: once it has run, no transform is left behind, so
+   fixed-position children (the lightbox) are never trapped inside this box. */
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.page-enter {
+  animation: pageEnter 0.42s var(--ease-out-soft);
+}
+
+@keyframes menuPop {
+  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.menu-pop {
+  animation: menuPop 0.18s ease-out;
+  transform-origin: top center;
+}
+
 /* ---------------------------------------------------------------------
    Scroll reveal. The pending (hidden) state is only ever set by JS via the
    data attribute, so with JS off or an observer failure the content simply
-   stays visible — it is never hidden by CSS alone.
+   stays visible. It is never hidden by CSS alone. JS removes the attribute
+   again when the transition has finished, so hover transitions on the same
+   element are not affected afterwards.
    --------------------------------------------------------------------- */
 [data-reveal] {
-  transition: opacity 0.65s ease-out, transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 0.65s ease-out, transform 0.65s var(--ease-out-soft);
   will-change: opacity, transform;
 }
 
@@ -57,11 +357,168 @@ body {
   transform: translateY(22px);
 }
 
+[data-reveal='pending'][data-variant='pop'] { transform: scale(0.9); }
+[data-reveal='pending'][data-variant='left'] { transform: translateX(-28px); }
+[data-reveal='pending'][data-variant='right'] { transform: translateX(28px); }
+[data-reveal='pending'][data-variant='fade'] { transform: none; }
+
 [data-reveal='in'] {
   opacity: 1;
   transform: none;
-  will-change: auto;
 }
+
+/* Staggered pop-in for the direct children of a grid: one observer per grid. */
+[data-stagger='pending'] > * {
+  opacity: 0;
+  transform: translateY(18px) scale(0.95);
+}
+
+[data-stagger='in'] > * {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.55s ease-out, transform 0.6s var(--ease-out-soft);
+}
+
+[data-stagger='in'] > *:nth-child(2) { transition-delay: 70ms; }
+[data-stagger='in'] > *:nth-child(3) { transition-delay: 140ms; }
+[data-stagger='in'] > *:nth-child(4) { transition-delay: 210ms; }
+[data-stagger='in'] > *:nth-child(5) { transition-delay: 280ms; }
+[data-stagger='in'] > *:nth-child(6) { transition-delay: 350ms; }
+[data-stagger='in'] > *:nth-child(7) { transition-delay: 420ms; }
+[data-stagger='in'] > *:nth-child(8) { transition-delay: 490ms; }
+[data-stagger='in'] > *:nth-child(n + 9) { transition-delay: 560ms; }
+
+/* Typewriter caret: zero-width, so it never moves the text it follows */
+@keyframes caretBlink {
+  0%, 49%   { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+.tw-caret {
+  display: inline-block;
+  width: 0;
+  position: relative;
+}
+
+.tw-caret::after {
+  content: '';
+  position: absolute;
+  left: 2px;
+  bottom: -0.08em;
+  height: 0.92em;
+  width: 3px;
+  border-radius: 2px;
+  background: #D30000;
+  animation: caretBlink 0.9s steps(1) infinite;
+}
+
+/* =====================================================================
+   Header: the outer sticky box keeps one height (no layout shift), only
+   the visible bar inside it shrinks.
+   ===================================================================== */
+.site-header {
+  height: 4.75rem;
+  pointer-events: none;
+}
+
+.site-bar {
+  pointer-events: auto;
+  height: 4.75rem;
+  background-color: rgba(255, 255, 255, 0.86);
+  border-bottom: 1px solid rgba(249, 214, 147, 0.9);
+  transition: height 0.3s var(--ease-out-soft), box-shadow 0.3s ease, background-color 0.3s ease;
+}
+
+.site-header[data-scrolled='true'] .site-bar {
+  height: 3.75rem;
+  background-color: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 10px 30px -18px rgba(43, 26, 14, 0.45);
+}
+
+.site-logo {
+  width: 3rem;
+  height: 3rem;
+  transition: width 0.3s var(--ease-out-soft), height 0.3s var(--ease-out-soft);
+}
+
+.site-header[data-scrolled='true'] .site-logo {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0.45rem;
+  height: 2px;
+  border-radius: 2px;
+  background: #D30000;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.28s var(--ease-out-soft);
+}
+
+.nav-link:hover,
+.nav-link[aria-current='page'],
+.nav-link[data-active='true'] { color: #B00000; }
+
+.nav-link:hover::after,
+.nav-link:focus-visible::after,
+.nav-link[aria-current='page']::after,
+.nav-link[data-active='true']::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Mobile drawer */
+.drawer-backdrop {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+}
+
+.drawer-backdrop[data-open='true'] {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.drawer {
+  transform: translateX(100%);
+  visibility: hidden;
+  transition: transform 0.34s var(--ease-out-soft), visibility 0s linear 0.34s;
+}
+
+.drawer[data-open='true'] {
+  transform: none;
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.drawer details > summary { list-style: none; }
+.drawer details > summary::-webkit-details-marker { display: none; }
+.drawer details[open] > summary .chev { transform: rotate(180deg); }
+.chev { transition: transform 0.25s ease; }
+
+details > summary.list-none::-webkit-details-marker { display: none; }
+
+/* =====================================================================
+   Lightbox
+   ===================================================================== */
+@keyframes lightboxIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes lightboxZoom {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.lightbox { animation: lightboxIn 0.2s ease-out; }
+.lightbox-frame { animation: lightboxZoom 0.28s var(--ease-out-soft); }
 
 /* Warm cream-to-white wash used to transition between stacked sections */
 .section-wash {
@@ -74,6 +531,25 @@ body {
     radial-gradient(ellipse 70% 60% at 15% 0%, rgba(244, 166, 44, 0.22), transparent 60%),
     radial-gradient(ellipse 60% 50% at 95% 10%, rgba(211, 0, 0, 0.10), transparent 55%),
     linear-gradient(180deg, #FDF5E7 0%, #FFFFFF 100%);
+}
+
+.page-hero-wash {
+  background-image:
+    radial-gradient(ellipse 60% 80% at 10% 0%, rgba(244, 166, 44, 0.20), transparent 60%),
+    radial-gradient(ellipse 50% 70% at 100% 0%, rgba(211, 0, 0, 0.08), transparent 60%),
+    linear-gradient(180deg, #FDF5E7 0%, rgba(253, 245, 231, 0) 100%);
+}
+
+.panel-vermilion {
+  background-image:
+    radial-gradient(ellipse 60% 80% at 0% 0%, rgba(244, 166, 44, 0.28), transparent 60%),
+    linear-gradient(135deg, #B00000 0%, #8A0000 55%, #5C0000 100%);
+}
+
+.panel-ink {
+  background-image:
+    radial-gradient(ellipse 50% 70% at 100% 0%, rgba(244, 166, 44, 0.16), transparent 60%),
+    linear-gradient(180deg, #2B1A0E 0%, #1F1209 100%);
 }
 
 /* Animated underline for nav and inline links */
@@ -100,6 +576,11 @@ body {
   transform-origin: left;
 }
 
+.link-arrow > .arrow { transition: transform 0.25s var(--ease-out-soft); }
+.link-arrow:hover > .arrow,
+a:hover > .link-arrow > .arrow,
+.group:hover .link-arrow > .arrow { transform: translateX(4px); }
+
 /* Press feedback on primary buttons */
 .btn-press {
   transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.18s ease, background-color 0.2s ease;
@@ -124,7 +605,7 @@ body {
 }
 
 /* ---------------------------------------------------------------------
-   Membership tier cards — each tier gets its own metal treatment.
+   Membership tier cards: each tier gets its own metal treatment.
    --------------------------------------------------------------------- */
 .membership-card {
   position: relative;
@@ -154,7 +635,7 @@ body {
   background-image: linear-gradient(135deg, #FFFDF8 0%, #FBE3C9 35%, #F0C98A 70%, #E8D9C5 100%);
 }
 
-/* A slow specular sweep across a medallion — reads as struck metal */
+/* A slow specular sweep across a medallion, reads as struck metal */
 @keyframes badgeShine {
   0%   { transform: translateX(-120%) rotate(18deg); }
   55%  { transform: translateX(240%) rotate(18deg); }
@@ -241,15 +722,32 @@ body {
 }
 
 /* Focus ring that is visible against both cream and vermilion backgrounds */
-:where(a, button, input, select, textarea):focus-visible {
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
   outline: 3px solid #D30000;
   outline-offset: 2px;
   border-radius: 0.375rem;
 }
 
+.on-dark :where(a, button, summary, [tabindex]):focus-visible {
+  outline-color: #F9D693;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  /* Every animation and transition on the site collapses to its end state:
+     nothing moves, nothing stays hidden. */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
   }
 
   .soft-card,
@@ -262,19 +760,40 @@ body {
   .float-slow,
   .float-slower,
   .gradient-drift,
-  .row-hover {
+  .row-hover,
+  .hero-rise,
+  .hero-pop,
+  .page-enter,
+  .menu-pop,
+  .mandala-spin,
+  .card-hover,
+  .btn,
+  .lightbox,
+  .lightbox-frame {
     animation: none !important;
     transition: none !important;
   }
 
+  .btn:hover,
+  .card-hover:hover,
+  .soft-card:hover,
+  .medallion-hover:hover {
+    transform: none;
+  }
+
   /* Decorative-only effects are removed entirely rather than frozen mid-sweep. */
-  .badge-shine::before {
+  .badge-shine::before,
+  .btn-primary::after,
+  .btn-saffron::after,
+  .tw-caret {
     display: none;
   }
 
   /* Whatever state JS left it in, reduced-motion users see the content. */
   [data-reveal],
-  [data-reveal='pending'] {
+  [data-reveal='pending'],
+  [data-stagger] > *,
+  [data-stagger='pending'] > * {
     opacity: 1 !important;
     transform: none !important;
   }
@@ -290,7 +809,7 @@ body {
 }
 
 /* ---------------------------------------------------------------------
-   The "Gaurav medallion" — the trust's own visual language (its Gaurav
+   The "Gaurav medallion": the trust's own visual language (its Gaurav
    Sohala award ceremonies) turned into the site's signature element:
    a struck medal with a ribbon, used for membership tiers and stats.
    --------------------------------------------------------------------- */
@@ -364,6 +883,190 @@ body {
   padding-right: 1.25rem;
 }
 
-.devanagari {
-  line-height: 1.8;
+@media (max-width: 359px) {
+  .container-page {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* =====================================================================
+   Motion layer (components/MotionFx.js, TypeRotate.js, Marquee.js).
+   All of it is decoration: switched off under prefers-reduced-motion at
+   the end of this block.
+   ===================================================================== */
+
+/* Reading progress, drawn over the very top edge of the page */
+.scroll-progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 3px;
+  z-index: 60;
+  pointer-events: none;
+}
+
+.scroll-progress > span {
+  display: block;
+  height: 100%;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  background: linear-gradient(90deg, #F4A62C, #D30000 55%, #8A0000);
+  box-shadow: 0 0 10px rgba(211, 0, 0, 0.45);
+  will-change: transform;
+}
+
+/* Back to top: the ring fills as the page is read */
+.to-top {
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  z-index: 45;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 10px 26px -12px rgba(43, 26, 14, 0.5);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(14px) scale(0.85);
+  transition: opacity 0.3s ease, transform 0.35s var(--ease-out-soft), visibility 0s linear 0.35s;
+}
+
+.to-top[data-show='true'] {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: opacity 0.3s ease, transform 0.35s var(--ease-out-soft), visibility 0s;
+}
+
+.to-top:hover { transform: translateY(-3px); }
+.to-top svg { width: 100%; height: 100%; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.to-top path { stroke: #B00000; stroke-width: 2.6; }
+.to-top-track { stroke: rgba(244, 166, 44, 0.35); stroke-width: 3; }
+.to-top-ring {
+  stroke: #D30000;
+  stroke-width: 3;
+  stroke-dasharray: 1;
+  stroke-dashoffset: calc(1 - var(--progress, 0));
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+
+/* Cards lean towards the pointer and carry a soft spotlight */
+.card-hover[data-tilt] {
+  position: relative;
+  transform: perspective(900px) translateY(-5px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.12s ease-out, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.card-hover[data-tilt]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(22rem circle at var(--mx, 50%) var(--my, 50%), rgba(244, 166, 44, 0.2), transparent 60%);
+}
+
+/* "Magnetic" buttons: MotionFx sets `translate`; this only smooths it */
+.btn-lg { transition: transform 0.2s var(--ease-out-soft), translate 0.25s var(--ease-out-soft), box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease; }
+
+[data-parallax] { will-change: translate; }
+
+/* Section headings: one gleam passes through the words as they scroll in */
+@keyframes headingGleam {
+  from { background-position: 100% 0; }
+  to   { background-position: 0 0; }
+}
+
+.h-section[data-lit='true'] {
+  background-image: linear-gradient(100deg, currentColor 0 42%, #D30000 48%, #F4A62C 52%, currentColor 58% 100%);
+  background-size: 260% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: headingGleam 1.5s var(--ease-out-soft) both;
+}
+
+/* Hero highlight: a slow colour drift through the trust's reds */
+@keyframes textShine {
+  from { background-position: 0 0; }
+  to   { background-position: -200% 0; }
+}
+
+.text-shine {
+  background-image: linear-gradient(90deg, #D30000, #8A0000 25%, #E2520A 50%, #8A0000 75%, #D30000);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: textShine 7s linear infinite;
+}
+
+.text-shine .tw-caret { -webkit-text-fill-color: initial; }
+
+/* Rotating typed phrase */
+.type-rotate-box { position: relative; display: inline-block; white-space: nowrap; vertical-align: bottom; }
+.type-rotate-ghost { visibility: hidden; }
+.type-rotate-live { position: absolute; left: 0; top: 0; }
+
+/* Endless band of words */
+@keyframes marqueeSlide {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.marquee {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marqueeSlide 38s linear infinite;
+}
+
+.marquee:hover .marquee-track,
+.marquee:focus-within .marquee-track { animation-play-state: paused; }
+
+.marquee-row { display: flex; flex-shrink: 0; align-items: center; }
+.marquee-row li { display: flex; align-items: center; gap: 1.75rem; padding-right: 1.75rem; white-space: nowrap; }
+.marquee-row svg { width: 0.9rem; height: 0.9rem; flex-shrink: 0; fill: currentColor; opacity: 0.7; }
+
+/* Photos: a slow zoom while they sit in a hovered card */
+.photo-frame img { transition: transform 0.9s var(--ease-out-soft); }
+.card-hover:hover .photo-frame img,
+.group:hover .photo-frame img { transform: scale(1.06); }
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-progress,
+  .to-top-ring { display: none; }
+
+  .to-top,
+  .to-top[data-show='true'] { transition: none !important; transform: none !important; }
+
+  .card-hover[data-tilt] { transform: none !important; }
+  .card-hover[data-tilt]::after { display: none; }
+
+  .h-section[data-lit='true'],
+  .text-shine {
+    animation: none !important;
+    background-image: none;
+    -webkit-text-fill-color: currentColor;
+  }
+
+  .marquee { -webkit-mask-image: none; mask-image: none; }
+  .marquee-track { animation: none !important; width: auto; justify-content: center; }
+  .marquee-row { flex-wrap: wrap; justify-content: center; row-gap: 0.5rem; }
+  .marquee-row[aria-hidden='true'] { display: none; }
+
+  .photo-frame img { transition: none !important; }
+  .card-hover:hover .photo-frame img,
+  .group:hover .photo-frame img { transform: none; }
+
+  [data-parallax] { translate: none !important; }
+  .btn-lg { translate: none !important; }
 }

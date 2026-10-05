@@ -1,0 +1,5 @@
+{
+  "generatedAt": null,
+  "note": "Written by scripts/fetch-old-images.js. Maps an old-site image URL to the local copy under /gallery. Empty until that script has been run.",
+  "images": {}
+}

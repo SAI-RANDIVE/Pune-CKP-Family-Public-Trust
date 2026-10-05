@@ -3,10 +3,16 @@
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 
-export default function NavDropdown({ years, mobile = false, onNavigate }) {
+/**
+ * Desktop navigation dropdown. Opens on hover, click, Enter/Space or ArrowDown;
+ * closes on Escape (focus returns to the trigger), outside click, or when
+ * focus leaves the group.
+ */
+export default function NavDropdown({ label, items, active = false, pathname = '' }) {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef(null);
   const triggerRef = useRef(null);
+  const closeTimer = useRef(null);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -27,42 +33,66 @@ export default function NavDropdown({ years, mobile = false, onNavigate }) {
     };
   }, [open]);
 
-  function navigate() {
-    setOpen(false);
-    onNavigate?.();
+  useEffect(() => () => window.clearTimeout(closeTimer.current), []);
+
+  function openNow() {
+    window.clearTimeout(closeTimer.current);
+    setOpen(true);
   }
 
-  if (mobile) {
-    return (
-      <div ref={wrapperRef}>
-        <button ref={triggerRef} type="button" onClick={() => setOpen((value) => !value)} aria-haspopup="true" aria-expanded={open} className="w-full flex items-center justify-between text-ink/80 font-medium">
-          <span>CKP Gaurav Sohala</span>
-          <span aria-hidden="true" className="text-vermilion-600">{open ? '−' : '+'}</span>
-        </button>
-        {open && <ul className="mt-3 ml-4 space-y-3 border-l-2 border-saffron-200 pl-4" role="menu">
-          <li role="none"><Link role="menuitem" href="/gaurav-sohala" onClick={navigate} className="text-sm font-semibold text-vermilion-700">All Years</Link></li>
-          {years.map((year) => <li role="none" key={year}><Link role="menuitem" href={`/gaurav-sohala/${year}`} onClick={navigate} className="text-sm text-ink/70">{year}</Link></li>)}
-        </ul>}
-      </div>
-    );
+  // A short grace period, so moving the pointer diagonally into the panel does not close it.
+  function closeSoon() {
+    window.clearTimeout(closeTimer.current);
+    closeTimer.current = window.setTimeout(() => setOpen(false), 140);
   }
+
+  function onTriggerKeyDown(event) {
+    if (event.key !== 'ArrowDown') return;
+    event.preventDefault();
+    setOpen(true);
+    window.requestAnimationFrame(() => wrapperRef.current?.querySelector('ul a')?.focus());
+  }
+
+  function onBlur(event) {
+    if (!wrapperRef.current?.contains(event.relatedTarget)) setOpen(false);
+  }
+
+  const twoColumns = items.length > 6;
 
   return (
-    <div
-      ref={wrapperRef}
-      className="relative"
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
-    >
-      <button ref={triggerRef} type="button" onClick={() => setOpen((value) => !value)} aria-haspopup="true" aria-expanded={open} className="flex items-center gap-1 text-sm font-medium text-ink/80 hover:text-vermilion-600 transition-colors">
-        CKP Gaurav Sohala
-        <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6" /></svg>
+    <div ref={wrapperRef} className="relative" onMouseEnter={openNow} onMouseLeave={closeSoon} onBlur={onBlur}>
+      <button
+        ref={triggerRef}
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        onKeyDown={onTriggerKeyDown}
+        aria-expanded={open}
+        aria-haspopup="true"
+        data-active={active ? 'true' : undefined}
+        className="nav-link"
+      >
+        {label}
+        <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" className={`chev ${open ? 'rotate-180' : ''}`}><path d="m6 9 6 6 6-6" /></svg>
       </button>
-      {open && <ul role="menu" className="absolute left-1/2 top-full z-50 mt-3 min-w-52 -translate-x-1/2 rounded-2xl border border-saffron-200 bg-cream-100 p-2 shadow-lg">
-        <li role="none"><Link role="menuitem" href="/gaurav-sohala" onClick={navigate} className="block rounded-xl px-4 py-2 text-sm font-semibold text-vermilion-700 hover:bg-saffron-50">All Years</Link></li>
-        <li role="none" className="px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-ink/40">Celebrations</li>
-        {years.map((year) => <li role="none" key={year}><Link role="menuitem" href={`/gaurav-sohala/${year}`} onClick={navigate} className="block rounded-xl px-4 py-2 text-sm text-ink/80 hover:bg-saffron-50">Gaurav Sohala {year}</Link></li>)}
-      </ul>}
+      {open && (
+        <div className="absolute left-1/2 top-full z-50 -translate-x-1/2 pt-2">
+          <ul className={`menu-pop rounded-2xl border border-saffron-200 bg-white p-2 shadow-lift ${twoColumns ? 'grid w-[26rem] grid-cols-2' : 'w-72'}`}>
+            {items.map((item, index) => (
+              <li key={item.href} className={twoColumns && index === 0 ? 'col-span-2' : ''}>
+                <Link
+                  href={item.href}
+                  onClick={() => setOpen(false)}
+                  aria-current={pathname === item.href ? 'page' : undefined}
+                  className="block rounded-xl px-4 py-2.5 transition-colors hover:bg-saffron-50 focus-visible:bg-saffron-50 aria-[current=page]:bg-saffron-50"
+                >
+                  <span className="block text-sm font-semibold text-ink">{item.label}</span>
+                  {item.note && <span className="mt-0.5 block text-xs leading-snug text-ink/65">{item.note}</span>}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }

@@ -2,7 +2,12 @@ import Link from 'next/link';
 import JsonLd from './JsonLd';
 import { getSiteUrl } from '../lib/seo';
 
-export default function Breadcrumbs({ items }) {
+/**
+ * Visible breadcrumb trail plus schema.org BreadcrumbList. `items` is
+ * [{ label, href }]; the last item is the current page and may omit `href`
+ * (pass `current` as the path so the structured data can still name its URL).
+ */
+export default function Breadcrumbs({ items, className = 'mb-8', align = 'start' }) {
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -16,15 +21,15 @@ export default function Breadcrumbs({ items }) {
 
   return (
     <>
-      <nav aria-label="Breadcrumb" className="mb-8">
-        <ol className="flex flex-wrap items-center gap-2 text-xs text-ink/60">
+      <nav aria-label="Breadcrumb" className={className}>
+        <ol className={`flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink/70 ${align === 'center' ? 'justify-center' : ''}`}>
           {items.map((item, index) => (
             <li key={`${item.label}-${index}`} className="flex items-center gap-2">
-              {index > 0 && <span aria-hidden="true" className="text-saffron-600">/</span>}
+              {index > 0 && <span aria-hidden="true" className="text-saffron-700">/</span>}
               {item.href ? (
-                <Link href={item.href} className="hover:text-vermilion-600 transition-colors">{item.label}</Link>
+                <Link href={item.href} className="inline-flex min-h-[2.75rem] items-center underline-offset-4 transition-colors hover:text-vermilion-600 hover:underline sm:min-h-0 sm:py-1">{item.label}</Link>
               ) : (
-                <span aria-current="page">{item.label}</span>
+                <span aria-current="page" className="font-medium text-ink/85">{item.label}</span>
               )}
             </li>
           ))}

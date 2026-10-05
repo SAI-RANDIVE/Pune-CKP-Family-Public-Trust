@@ -1,28 +1,39 @@
 import Link from 'next/link';
-import Reveal from './Reveal';
+import SectionHeading from './SectionHeading';
+import { Stagger } from './Reveal';
+import AreaIcon from './AreaIcon';
 import { AREAS_OF_WORK } from '../lib/areasOfWorkData';
+
+export function AreaCard({ area, index, headingLevel: Heading = 'h3' }) {
+  return (
+    <Link href={`/areas-of-work/${area.slug}`} className="card card-hover group relative flex h-full flex-col overflow-hidden p-6 sm:p-7">
+      <span className="absolute right-5 top-4 font-display text-5xl leading-none text-saffron-200" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-vermilion-50 text-vermilion-700 transition-colors duration-300 group-hover:bg-vermilion-500 group-hover:text-white">
+        <AreaIcon name={area.icon} className="h-6 w-6" />
+      </span>
+      <Heading className="h-card mt-5">{area.title}</Heading>
+      {area.titleMr && <p className="devanagari text-sm text-ink/65" lang="mr">{area.titleMr}</p>}
+      <p className="mt-3 flex-1 text-sm leading-relaxed text-ink/75">{area.summary}</p>
+      {area.fromVision && <p className="mt-3 inline-flex self-start rounded-full bg-saffron-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-saffron-900">Added in Vision 2021</p>}
+      <span className="link-arrow mt-3">Explore <span className="sr-only">{area.title} work</span><span className="arrow" aria-hidden="true">→</span></span>
+    </Link>
+  );
+}
 
 export default function ObjectivesSection() {
   return (
-    <section className="bg-cream-300/60 border-y border-saffron-200 py-20">
-      <div className="container-page">
-        <Reveal className="text-center max-w-2xl mx-auto">
-          <p className="text-xs font-semibold tracking-[0.25em] uppercase text-vermilion-600">Areas of Work</p>
-          <h2 className="font-display text-3xl md:text-4xl mt-3 text-ink">Five commitments, one community</h2>
-          <p className="text-sm text-ink/70 mt-4 leading-relaxed">The trust deed names five fields of work. Each one runs as its own set of schemes, with its own beneficiaries and its own accounting.</p>
-        </Reveal>
+    <section className="border-y border-saffron-200 bg-cream-300/50" aria-labelledby="areas-heading">
+      <div className="container-page section-y">
+        <SectionHeading
+          id="areas-heading"
+          eyebrow="Areas of Work"
+          title="Five objectives, and a love of the arts"
+          intro="The trust deed sets out five fields of work: educational, medical, environmental, social and sports. Vision 2021 added a sixth focus, literature and art."
+        />
 
-        <div className="grid md:grid-cols-3 gap-8 mt-14">
-          {AREAS_OF_WORK.map((a, i) => (
-            <Reveal key={a.slug} delay={i * 80}>
-            <Link href={`/areas-of-work/${a.slug}`} className="soft-card block h-full bg-cream-100 rounded-2xl p-7 border border-saffron-200/70 shadow-sm hover:border-vermilion-400">
-              <p className="font-display text-3xl text-saffron-500">{String(i + 1).padStart(2, '0')}</p>
-              <h3 className="font-display text-xl text-vermilion-700 mt-2">{a.title}</h3>
-              <p className="text-sm text-ink/70 mt-3 leading-relaxed">{a.summary}</p>
-            </Link>
-            </Reveal>
-          ))}
-        </div>
+        <Stagger className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {AREAS_OF_WORK.map((area, index) => <AreaCard key={area.slug} area={area} index={index} />)}
+        </Stagger>
       </div>
     </section>
   );

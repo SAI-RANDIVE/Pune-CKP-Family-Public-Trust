@@ -1,51 +1,55 @@
+import Link from 'next/link';
 import CountUp from './CountUp';
-import Reveal from './Reveal';
+import SectionHeading from './SectionHeading';
+import Reveal, { Stagger } from './Reveal';
+import AreaIcon from './AreaIcon';
+import { CONTRIBUTION_COUNTERS, CONTRIBUTION_TOTAL } from '../lib/impactData';
 
-// Figures as published in the trust's own donations-and-contributions ledger.
-const STATS = [
-  { label: 'Educational Support', amount: 1872250, note: 'Scholarships, notebooks, uniforms and computers for schools' },
-  { label: 'Healthcare Initiatives', amount: 2152310, note: 'Medical loans, camps and support for Warkari pilgrims' },
-  { label: 'Social Welfare & Community Development', amount: 1917977, note: 'Flood relief, old-age homes and pandemic aid' },
-  { label: 'Environmental Programs', amount: 71000, note: 'Water conservation and tree-plantation drives' },
-];
+const ICONS = { education: 'book', health: 'heart', social: 'hands', environment: 'leaf' };
 
-const TOTAL = STATS.reduce((sum, s) => sum + s.amount, 0);
-
-export default function StatsSection() {
+/** Donations & Contributions: the four published totals, by cause. */
+export default function StatsSection({ heading = true }) {
   return (
-    <section className="container-page py-20">
-      <Reveal className="text-center max-w-2xl mx-auto">
-        <p className="text-xs font-semibold tracking-[0.25em] uppercase text-vermilion-600">Donations &amp; Contributions</p>
-        <h2 className="font-display text-3xl md:text-4xl mt-3 text-ink">Where the trust&rsquo;s support has gone</h2>
-        <p className="text-sm text-ink/70 mt-4 leading-relaxed">
-          Every rupee below has already been spent — on a student&rsquo;s fees, a family&rsquo;s
-          hospital bill, a village&rsquo;s water supply. These are disbursements, not pledges.
-        </p>
-      </Reveal>
+    <section className="container-page section-y" aria-labelledby={heading ? 'contributions-heading' : undefined}>
+      {!heading && <h2 className="sr-only">Contributions by cause</h2>}
+      {heading && (
+        <SectionHeading
+          id="contributions-heading"
+          eyebrow="Donations & Contributions"
+          title="Where the trust’s support has gone"
+          intro="The donations and contributions made by the trust for various important causes, as it has published them."
+        />
+      )}
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mt-14">
-        {STATS.map((s, i) => (
-          <Reveal key={s.label} delay={i * 90} className="flex flex-col items-center text-center">
-            <div className="medallion medallion-stat medallion--gold medallion-hover">
-              <p className="font-mono text-[10px] font-semibold text-vermilion-800 px-2">
-                <CountUp value={s.amount} prefix="₹" />
+      <Stagger as="ul" className={`${heading ? 'mt-12' : ''} grid gap-5 sm:grid-cols-2 lg:grid-cols-4`}>
+        {CONTRIBUTION_COUNTERS.map((item) => {
+          const share = Math.max(3, Math.round((item.amount / CONTRIBUTION_TOTAL) * 100));
+          return (
+            <li key={item.key} className="card card-hover flex flex-col p-6">
+              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-saffron-100 text-vermilion-700">
+                <AreaIcon name={ICONS[item.key]} className="h-6 w-6" />
+              </span>
+              <p className="mt-5 font-display text-3xl leading-none text-vermilion-700">
+                <CountUp value={item.amount} prefix="₹" />
               </p>
-            </div>
-            <p className="mt-4 text-sm font-medium text-ink/75 max-w-[10rem]">{s.label}</p>
-            <p className="mt-2 text-xs text-ink/55 max-w-[11rem] leading-relaxed">{s.note}</p>
-          </Reveal>
-        ))}
-      </div>
+              <h3 className="mt-3 text-sm font-semibold text-ink">{item.label}</h3>
+              <p className="mt-1.5 flex-1 text-xs leading-relaxed text-ink/70">{item.note}</p>
+              <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-cream-300" aria-hidden="true">
+                <div className="h-full rounded-full bg-gradient-to-r from-saffron-500 to-vermilion-500" style={{ width: `${share}%` }} />
+              </div>
+              <Link href={item.href} className="link-arrow mt-2">See the work <span className="arrow" aria-hidden="true">→</span></Link>
+            </li>
+          );
+        })}
+      </Stagger>
 
-      <Reveal delay={200} className="mt-14 text-center">
-        <p className="text-sm text-ink/70">
-          Total disbursed since 2016:{' '}
-          <span className="font-mono font-semibold text-vermilion-700">
-            <CountUp value={TOTAL} prefix="₹" />
-          </span>
-          {' '}— with a further ₹40 lakh committed to projects now under way, and a
-          stated goal of reaching ₹1 crore in total social contribution.
+      <Reveal className="mt-10 flex flex-col items-center justify-between gap-4 rounded-3xl border border-saffron-200 bg-cream-300/50 px-6 py-5 text-center md:flex-row md:text-left">
+        <p className="text-sm leading-relaxed text-ink/80">
+          Together these come to{' '}
+          <strong className="font-mono font-semibold text-vermilion-700">₹{CONTRIBUTION_TOTAL.toLocaleString('en-IN')}</strong>.
+          The trust plans a further ₹40 lakh and more on upcoming projects, and aims to take its total social contribution to ₹1 crore in 2026–27.
         </p>
+        <Link href="/impact" className="btn btn-sm btn-outline shrink-0">See the full ledger</Link>
       </Reveal>
     </section>
   );

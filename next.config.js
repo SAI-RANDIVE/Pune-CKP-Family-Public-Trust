@@ -59,12 +59,18 @@ const nextConfig = {
   images: {
     // Scoped deliberately: `hostname: '**'` turns the image optimizer into an
     // open proxy and is a known DoS vector. Add hosts here as they're needed.
+    // puneckptrust.org is the old site: gallery photos are served from it until
+    // `node scripts/fetch-old-images.js` has copied them into public/gallery.
+    // i.ytimg.com serves the video-gallery thumbnails.
     remotePatterns: [
-      { protocol: 'https', hostname: 'picsum.photos' },
-      { protocol: 'https', hostname: 'puneckptrust.org' },
+      { protocol: 'https', hostname: 'puneckptrust.org', pathname: '/wp-content/uploads/**' },
+      { protocol: 'https', hostname: 'www.puneckptrust.org', pathname: '/wp-content/uploads/**' },
       { protocol: 'https', hostname: 'puneckptrust.in' },
+      { protocol: 'https', hostname: 'i.ytimg.com', pathname: '/vi/**' },
     ],
     formats: ['image/avif', 'image/webp'],
+    // Old-site photos never change: let the optimizer keep them for a month.
+    minimumCacheTTL: 2592000,
   },
 
   async headers() {

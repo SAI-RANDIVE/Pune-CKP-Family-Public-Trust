@@ -1,43 +1,74 @@
 import Link from 'next/link';
-import Breadcrumbs from '../../../../components/Breadcrumbs';
+import PageHero from '../../../../components/PageHero';
+import Reveal from '../../../../components/Reveal';
+import AreaIcon from '../../../../components/AreaIcon';
 import { BANK_DETAILS } from '../../../../lib/bankDetails';
 import { buildMetadata } from '../../../../lib/seo';
+import { TRUST } from '../../../../lib/siteData';
 
 export const metadata = buildMetadata({
-  title: 'Bank Transfer & Donations | Pune CKP Family Public Trust',
+  title: 'Bank Transfer & Large Donations | Pune CKP Family Public Trust',
   description: 'Bank, IFSC and G-Pay details for donations above ₹10,000 to Pune CKP Family Public Trust, plus how to claim your official receipt after transferring.',
   path: '/donate/bank-transfer',
 });
 
+const ROWS = [
+  ['Bank', BANK_DETAILS.bankName],
+  ['Branch', BANK_DETAILS.branch],
+  ['Account number', BANK_DETAILS.accountNumber],
+  ['IFSC', BANK_DETAILS.ifsc],
+  ['G-Pay', BANK_DETAILS.gpay],
+  ['PAN', BANK_DETAILS.pan],
+];
+
 export default function BankTransferPage() {
   return (
-    <div className="container-page py-16 md:py-24">
-      <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Donate', href: '/donate' }, { label: 'Bank Transfer' }]} />
-      <p className="text-xs font-semibold tracking-[0.25em] uppercase text-vermilion-600 text-center">For Donations</p>
-      <h1 className="font-display text-4xl md:text-5xl text-center mt-3">Bank Transfer &amp; Large Donations</h1>
-      <p className="max-w-2xl mx-auto mt-5 text-center text-ink/70 leading-relaxed">Use these details for donations above ₹10,000, or whenever you prefer a direct bank transfer or UPI over the online form.</p>
+    <>
+      <PageHero
+        eyebrow="For Donations"
+        title="Bank transfer and large donations"
+        intro="Use these details for donations above ₹10,000, or whenever you prefer a direct bank transfer or UPI over the online form."
+        breadcrumbs={[{ label: 'Donate', href: '/donate' }, { label: 'Bank Transfer' }]}
+      />
 
-      <div className="max-w-2xl mx-auto mt-12 bg-cream-100 border border-saffron-200 rounded-2xl p-7 md:p-9">
-        <h2 className="font-display text-2xl text-vermilion-700">Transfer details</h2>
-        <dl className="mt-6 space-y-3 text-sm text-ink/75 font-mono">
-          <div className="flex flex-wrap justify-between gap-3"><dt>Bank</dt><dd>{BANK_DETAILS.bankName}</dd></div>
-          <div className="flex flex-wrap justify-between gap-3"><dt>Branch</dt><dd>{BANK_DETAILS.branch}</dd></div>
-          <div className="flex flex-wrap justify-between gap-3"><dt>Account number</dt><dd>{BANK_DETAILS.accountNumber}</dd></div>
-          <div className="flex flex-wrap justify-between gap-3"><dt>IFSC</dt><dd>{BANK_DETAILS.ifsc}</dd></div>
-          <div className="flex flex-wrap justify-between gap-3"><dt>G-Pay</dt><dd>{BANK_DETAILS.gpay}</dd></div>
-          <div className="flex flex-wrap justify-between gap-3"><dt>PAN</dt><dd>{BANK_DETAILS.pan}</dd></div>
-        </dl>
-      </div>
+      <section className="container-page section-y">
+        <div className="mx-auto grid max-w-4xl gap-6 lg:grid-cols-[1.2fr,0.8fr]">
+          <Reveal variant="left" className="card overflow-hidden">
+            <div className="motif-paithani" aria-hidden="true" />
+            <div className="p-6 sm:p-8">
+              <h2 className="h-card flex items-center gap-3"><AreaIcon name="bank" className="h-5 w-5" />Transfer details</h2>
+              <dl className="mt-5 divide-y divide-saffron-200/70 font-mono text-sm text-ink/85">
+                {ROWS.map(([label, value]) => (
+                  <div key={label} className="flex flex-wrap justify-between gap-x-4 gap-y-1 py-3">
+                    <dt className="text-ink/65">{label}</dt>
+                    <dd className="font-semibold">{value}</dd>
+                  </div>
+                ))}
+              </dl>
+              <p className="mt-4 text-xs leading-relaxed text-ink/65">Please check the details carefully before you transfer.</p>
+            </div>
+          </Reveal>
 
-      <div className="max-w-2xl mx-auto mt-8 bg-cream-300/60 border border-saffron-200 rounded-2xl p-7">
-        <h2 className="font-display text-xl text-vermilion-700">After you transfer</h2>
-        <p className="text-sm text-ink/70 mt-3 leading-relaxed">Please email puneckpfamily@gmail.com or call 7447794477 with your transaction reference. The trust will issue an official receipt.</p>
-      </div>
-
-      <div className="mt-10 flex flex-wrap justify-center gap-3">
-        <Link href="/donate" className="rounded-full bg-vermilion-500 text-cream-100 px-6 py-3 font-semibold hover:bg-vermilion-600 transition-colors">Donate up to ₹10,000 online</Link>
-        <Link href="/contact" className="rounded-full border-2 border-vermilion-500 text-vermilion-600 px-6 py-3 font-semibold hover:bg-vermilion-50 transition-colors">Contact the Trust</Link>
-      </div>
-    </div>
+          <Reveal variant="right" className="flex flex-col gap-6">
+            <div className="rounded-3xl border border-saffron-200 bg-cream-300/50 p-6 sm:p-7">
+              <h2 className="h-card">After you transfer</h2>
+              <p className="mt-3 text-sm leading-relaxed text-ink/80">
+                Please email <a href={`mailto:${TRUST.email}`} className="break-all font-semibold text-vermilion-700 underline underline-offset-4">{TRUST.email}</a> or
+                call <a href={TRUST.phoneHref} className="font-semibold text-vermilion-700 underline underline-offset-4">{TRUST.phoneDisplay}</a> with your
+                transaction reference. The trust will issue an official receipt.
+              </p>
+            </div>
+            <div className="on-dark panel-vermilion rounded-3xl p-6 text-white sm:p-7">
+              <h2 className="font-display text-xl text-saffron-300">Giving ₹10,000 or less?</h2>
+              <p className="mt-2 text-sm leading-relaxed text-cream-200/90">Donate online and your PDF receipt is ready at once.</p>
+              <div className="mt-5 flex flex-wrap gap-3">
+                <Link href="/donate" className="btn btn-sm btn-saffron">Donate online</Link>
+                <Link href="/contact" className="btn btn-sm btn-light">Contact the trust</Link>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+    </>
   );
 }

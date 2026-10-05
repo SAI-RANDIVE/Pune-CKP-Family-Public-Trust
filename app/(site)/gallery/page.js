@@ -1,54 +1,87 @@
-import Image from 'next/image';
 import Link from 'next/link';
-import Breadcrumbs from '../../../components/Breadcrumbs';
-import { buildMetadata } from '../../../lib/seo';
+import PageHero from '../../../components/PageHero';
+import { Stagger } from '../../../components/Reveal';
+import { AlbumCard } from '../../../components/Cards';
+import CtaBanner from '../../../components/CtaBanner';
+import JsonLd from '../../../components/JsonLd';
+import { buildMetadata, getSiteUrl, absoluteUrl, organizationRef } from '../../../lib/seo';
+import { GALLERY_ALBUMS, GALLERY_CATEGORIES, GALLERY_TOTAL_IMAGES, VIDEOS } from '../../../lib/galleryData';
+
+const lead = GALLERY_ALBUMS[0];
 
 export const metadata = buildMetadata({
-  title: 'Gallery | Pune CKP Family Public Trust',
-  description: 'Photographs of Pune CKP Family Public Trust — the community, its service work and the annual CKP Gaurav Sohala felicitation ceremonies held since 2018.',
+  title: 'Photo Gallery | Pune CKP Family Public Trust',
+  description: 'Photo albums of Pune CKP Family Public Trust: Gaurav Sohala ceremonies, medical camps, relief work, school programmes, literary meets, music and festivals since 2016.',
   path: '/gallery',
+  image: lead ? lead.cover.src : undefined,
+  imageAlt: lead ? lead.cover.alt : undefined,
 });
 
-// TODO: alt text — these are placeholder images. Replace with real Trust photographs
-// and give each item a descriptive `alt` written for the photo it actually shows.
-const GALLERY_ITEMS = [
-  { title: 'Trust Identity', image: 'https://picsum.photos/seed/pune-ckp-trust/900/900', note: 'The trust’s emblem and community identity.' },
-  { title: 'Gaurav Sohala 2018', image: 'https://picsum.photos/seed/ckp-gaurav-2018/900/900', note: 'The first community felicitation event.' },
-  { title: 'Gaurav Sohala 2019', image: 'https://picsum.photos/seed/ckp-gaurav-2019/900/900', note: 'A Republic Day celebration with patriotic fervour.' },
-  { title: 'Relief & Service', image: 'https://picsum.photos/seed/ckp-relief/900/900', note: 'Support during medical and disaster-response work.' },
-  { title: 'Education Support', image: 'https://picsum.photos/seed/ckp-education/900/900', note: 'Books, scholarships and student upliftment.' },
-  { title: 'Community Gatherings', image: 'https://picsum.photos/seed/ckp-community/900/900', note: 'Celebrations that bring the family together.' },
-];
+const slugify = (name) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 export default function GalleryPage() {
+  const siteUrl = getSiteUrl();
+  const gallerySchema = {
+    '@context': 'https://schema.org',
+    '@type': 'ImageGallery',
+    name: 'Photo gallery of Pune CKP Family Public Trust',
+    description: `${GALLERY_TOTAL_IMAGES} photographs in ${GALLERY_ALBUMS.length} albums.`,
+    url: `${siteUrl}/gallery`,
+    publisher: organizationRef(),
+    hasPart: GALLERY_ALBUMS.map((album) => ({
+      '@type': 'ImageGallery',
+      name: album.title,
+      description: album.description,
+      url: `${siteUrl}/gallery/${album.slug}`,
+      thumbnailUrl: absoluteUrl(album.cover.src),
+    })),
+  };
+
   return (
-    <div className="container-page py-16 md:py-24">
-      <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Gallery' }]} />
-      <p className="text-xs font-semibold tracking-[0.25em] uppercase text-vermilion-600 text-center">Our Gallery</p>
-      <h1 className="font-display text-4xl md:text-5xl text-center mt-3">The CKP family in focus</h1>
-      <p className="max-w-2xl mx-auto mt-5 text-center text-ink/70 leading-relaxed">A growing visual record of the trust, its people and its work across the community.</p>
+    <>
+      <JsonLd data={gallerySchema} />
+      <PageHero
+        eyebrow="Gallery"
+        title="The CKP family in pictures"
+        intro={`${GALLERY_TOTAL_IMAGES} photographs in ${GALLERY_ALBUMS.length} albums: ceremonies, camps, classrooms, relief work and celebrations, from 2016 onwards.`}
+        breadcrumbs={[{ label: 'Gallery' }]}
+      >
+        <Link href="/gallery/videos" className="btn btn-primary">Video gallery ({VIDEOS.length})</Link>
+        <Link href="/events" className="btn btn-outline">Events &amp; activities</Link>
+      </PageHero>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-14 max-w-5xl mx-auto">
-        {GALLERY_ITEMS.map((item) => (
-          <figure key={item.title} className="soft-card bg-cream-100 border border-saffron-200/70 rounded-2xl p-5">
-            <div className="aspect-square rounded-xl overflow-hidden bg-cream-300">
-              <Image src={item.image} alt={item.title} width={900} height={900} className="h-full w-full object-cover" />
-            </div>
-            <figcaption className="font-display text-lg text-vermilion-700 mt-4">{item.title}</figcaption>
-            <p className="text-sm text-ink/70 mt-1">{item.note}</p>
-          </figure>
-        ))}
-        <div className="sm:col-span-2 bg-cream-300/60 border border-saffron-200 rounded-2xl p-8 flex flex-col justify-center soft-card">
-          <h2 className="font-display text-2xl text-vermilion-700">More memories coming soon</h2>
-          <p className="text-sm text-ink/70 mt-3 leading-relaxed">Community and event photographs can be added to the gallery as they become available. The page is ready for Gaurav Sohala, education, medical and social-work albums.</p>
-          <Link href="/gaurav-sohala" className="inline-block mt-5 text-sm font-semibold text-vermilion-600 hover:text-vermilion-700">Explore Gaurav Sohala history →</Link>
-        </div>
+      <div className="container-page section-y">
+        <nav aria-label="Album categories">
+          <ul className="flex flex-wrap justify-center gap-2">
+            {GALLERY_CATEGORIES.map((category) => (
+              <li key={category}>
+                <a href={`#${slugify(category)}`} className="inline-flex min-h-[2.75rem] items-center rounded-full border border-saffron-300 bg-white px-4 text-sm font-semibold text-ink transition-colors hover:border-vermilion-400 hover:text-vermilion-700">
+                  {category}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        {GALLERY_CATEGORIES.map((category, groupIndex) => {
+          const albums = GALLERY_ALBUMS.filter((album) => album.category === category).sort((a, b) => b.year - a.year);
+          const id = slugify(category);
+          return (
+            <section key={category} id={id} aria-labelledby={`${id}-heading`} className="mt-14 scroll-mt-28">
+              <h2 id={`${id}-heading`} className="flex items-center gap-4 font-display text-2xl text-vermilion-700 md:text-3xl">
+                {category}
+                <span className="h-px flex-1 bg-gradient-to-r from-saffron-400 to-transparent" aria-hidden="true" />
+                <span className="font-body text-xs font-semibold uppercase tracking-wide text-ink/65">{albums.length} {albums.length === 1 ? 'album' : 'albums'}</span>
+              </h2>
+              <Stagger className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {albums.map((album, i) => <AlbumCard key={album.slug} album={album} priority={groupIndex === 0 && i < 3} />)}
+              </Stagger>
+            </section>
+          );
+        })}
       </div>
 
-      <div className="mt-14 text-center">
-        <Link href="/donate" className="rounded-full bg-vermilion-500 text-cream-100 px-6 py-3 font-semibold hover:bg-vermilion-600 transition-colors">Support the work</Link>
-        <Link href="/contact" className="ml-3 rounded-full border-2 border-vermilion-500 text-vermilion-600 px-6 py-3 font-semibold hover:bg-vermilion-50 transition-colors">Share a photograph</Link>
-      </div>
-    </div>
+      <CtaBanner />
+    </>
   );
 }

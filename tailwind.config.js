@@ -43,6 +43,15 @@ module.exports = {
         display: ['var(--font-display)'],
         body: ['var(--font-body)'],
         mono: ['var(--font-mono)'],
+        devanagari: ['var(--font-devanagari)', 'var(--font-body)'],
+      },
+      boxShadow: {
+        soft: '0 1px 2px rgba(43, 26, 14, 0.04), 0 8px 24px -12px rgba(43, 26, 14, 0.14)',
+        lift: '0 2px 4px rgba(43, 26, 14, 0.05), 0 22px 44px -22px rgba(138, 0, 0, 0.32)',
+        glow: '0 14px 32px -14px rgba(211, 0, 0, 0.55)',
+      },
+      borderRadius: {
+        '4xl': '2rem',
       },
       backgroundImage: {
         'radial-medallion': 'radial-gradient(circle at center, var(--tw-gradient-stops))',
