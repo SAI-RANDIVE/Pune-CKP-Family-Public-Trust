@@ -26,7 +26,12 @@ const notFound = () => new NextResponse('Not found', { status: 404, headers: { '
 
 export function middleware(request) {
   const { pathname } = request.nextUrl;
-  const admin = isAdminHost(request.headers.get('host'));
+  // x-forwarded-host first: it is what the visitor's browser asked for. When a form
+  // action redirects, Next fetches the next page from itself on its internal
+  // address, and only this header still carries the real host. Hosting platforms
+  // (and any reverse proxy in front of the app) must set it themselves and not
+  // pass a visitor-supplied value through.
+  const admin = isAdminHost(request.headers.get('x-forwarded-host') || request.headers.get('host'));
 
   if (!admin) {
     // The public site must not expose the management system in any form.
