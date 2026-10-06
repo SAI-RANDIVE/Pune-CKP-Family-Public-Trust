@@ -144,8 +144,8 @@ async function main() {
     await pool.query('delete from admin_sessions where admin_id = $1', [admin.id]);
     await pool.query(
       `insert into audit_logs (admin_id, admin_email, action, entity, entity_id, detail)
-       values ($1,$2,'user_created_from_server','admin_users',$1::text,$3)`,
-      [admin.id, admin.email, JSON.stringify({ role: admin.role })]
+       values ($1,$2,'user_created_from_server','admin_users',$4,$3)`,
+      [admin.id, admin.email, JSON.stringify({ role: admin.role }), String(admin.id)]
     );
 
     console.log('\nLogin ready:');
