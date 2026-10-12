@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Icon from '../../../components/tms/icons';
-import { Alert, Badge, Bars, Card, KeyValues, Stat } from '../../../components/tms/ui';
+import { Alert, Badge, Card, KeyValues, Stat } from '../../../components/tms/ui';
+import { Columns, Meter, ShareBar, TrendLine } from '../../../components/tms/charts';
 import { requireRole, can } from '../../../lib/tms/auth';
 import { canChange, canSee } from '../../../lib/tms/access';
 import { getI18n } from '../../../lib/tms/i18n/server';
@@ -125,6 +126,14 @@ export default async function DashboardPage() {
       [fy, `${Number(fy.slice(0, 4)) - 1}-${fy.slice(2, 4)}`]).catch(() => null) : none,
   ]);
 
+  // For the charts: the last financial years side by side, and how membership has grown.
+  const [byFy, joinedByYear] = await Promise.all([
+    money ? q('select fy, income, expense from v_income_vs_expense_by_fy order by fy desc limit 6') : empty,
+    sees('members') ? q(
+      `select extract(year from start_date)::int as year, count(*)::int as n from memberships
+        where deleted_at is null and start_date is not null group by 1 order by 1 desc limit 7`) : empty,
+  ]);
+
   const mayEnter = can(admin, 'enterMoney');
   const mayReview = can(admin, 'review') && sees('review');
   const tiles = [
@@ -155,7 +164,31 @@ export default async function DashboardPage() {
       ...(sees('expenses') ? [{ series: t('rep.c.expense'), value: r.expense }] : []),
     ],
   }));
-  const kindRows = byKind.map((r) => ({ label: t(`kind.${r.kind}`), values: [{ series: t('f.amount'), value: r.total }] }));
+  const kindParts = byKind.map((r) => ({ label: t(`kind.${r.kind}`), value: r.total }));
+  const kindRows = kindParts;
+  // Running totals: what has come in and gone out since the year began.
+  let runIn = 0;
+  let runOut = 0;
+  const cumulative = months.map((r) => {
+    runIn += Number(r.income) || 0;
+    runOut += Number(r.expense) || 0;
+    return {
+      label: monthName(r.cal_year, r.cal_month),
+      values: [
+        ...(sees('donations') ? [{ series: t('rep.c.income'), value: runIn }] : []),
+        ...(sees('expenses') ? [{ series: t('rep.c.expense'), value: runOut }] : []),
+      ],
+    };
+  });
+  const yearRows = [...byFy].reverse().map((r) => ({
+    label: r.fy,
+    values: [
+      ...(sees('donations') ? [{ series: t('rep.c.income'), value: r.income }] : []),
+      ...(sees('expenses') ? [{ series: t('rep.c.expense'), value: r.expense }] : []),
+    ],
+  }));
+  const joinedRows = [...joinedByYear].reverse().map((r) => ({ label: String(r.year), values: [{ series: t('x.dash.joined_years'), value: r.n }] }));
+  const figures = t('x.ch.table');
   const headRows = heads.map((r) => ({ label: pick(lang, r.name_mr, r.name_en), values: [{ series: t('f.amount'), value: r.total }] }));
   const surplus = totals ? Number(totals.income) - Number(totals.expenses) : 0;
   const title = OFFICER_TITLES.find((o) => o.key === admin.designation);
@@ -298,9 +331,34 @@ export default async function DashboardPage() {
       </div>
 
       {monthRows.length > 0 && (
-        <Card title={t('x.dash.months', { fy })}>
-          <Bars rows={monthRows} caption={t('x.dash.months_note')} empty={t('c.no_data')} />
-        </Card>
+        <div className="tms-grid tms-grid--charts">
+          <Card title={t('x.dash.months', { fy })}>
+            <Columns rows={monthRows} caption={t('x.dash.months_note')} empty={t('c.no_data')} tableLabel={figures} />
+          </Card>
+          <Card title={t('x.dash.cumulative', { fy })}>
+            <TrendLine points={cumulative} caption={t('x.dash.cumulative_note')} empty={t('c.no_data')} tableLabel={figures} />
+          </Card>
+          {yearRows.length > 1 && (
+            <Card title={t('x.dash.years')}>
+              <Columns rows={yearRows} caption={t('x.dash.years_note')} empty={t('c.no_data')} tableLabel={figures} />
+            </Card>
+          )}
+          {headRows.length > 0 && (
+            <Card title={t('x.dash.heads', { fy })}>
+              <Columns rows={headRows} caption={t('x.dash.heads_note')} empty={t('c.no_data')} tableLabel={figures} />
+            </Card>
+          )}
+          {kindRows.length > 0 && (
+            <Card title={t('x.dash.where_from')}>
+              <ShareBar parts={kindParts} empty={t('c.no_data')} otherLabel={t('x.ch.other')} />
+            </Card>
+          )}
+          {joinedRows.length > 1 && (
+            <Card title={t('x.dash.joined_years')}>
+              <Columns rows={joinedRows} money={false} caption={t('x.dash.joined_years_note')} empty={t('c.no_data')} tableLabel={figures} />
+            </Card>
+          )}
+        </div>
       )}
 
       <div className="tms-grid tms-grid--2">
@@ -329,11 +387,18 @@ export default async function DashboardPage() {
           <Card title={t('x.dash.members')}>
             <KeyValues items={[
               [t('dash.members'), <strong key="m" className="num">{formatNumber(members.active)}</strong>],
-              [t('x.dash.by_tier'), `${t('tier.silver')} ${formatNumber(members.silver)} · ${t('tier.gold')} ${formatNumber(members.gold)} · ${t('tier.platinum')} ${formatNumber(members.platinum)}`],
               [t('x.dash.joined', { fy }), formatNumber(members.joined)],
               [t('x.dash.lapsed'), formatNumber(members.lapsed)],
               [t('x.dash.portal_users'), formatNumber(members.portal_users)],
             ]} />
+            <h3 style={{ margin: '1rem 0 0.5rem' }}>{t('x.dash.tiers')}</h3>
+            <ShareBar
+              money={false} otherLabel={t('x.ch.other')}
+              parts={[
+                { label: t('tier.silver'), value: members.silver }, { label: t('tier.gold'), value: members.gold }, { label: t('tier.platinum'), value: members.platinum },
+                { label: t('x.ch.other'), value: Math.max(0, members.active - members.silver - members.gold - members.platinum) },
+              ]}
+            />
             {expiring.length > 0 && (
               <>
                 <h3 style={{ margin: '1rem 0 0.5rem' }}>{t('x.dash.expiring_next')}</h3>
@@ -367,18 +432,12 @@ export default async function DashboardPage() {
             <p className="tms-hint"><Link href="/events">{t('x.dash.all_events')}</Link></p>
           </Card>
         )}
-        {kindRows.length > 0 && (
-          <Card title={t('dash.chart_kind', { fy })}>
-            <Bars rows={kindRows} caption={t('dash.chart_kind_note')} empty={t('c.no_data')} />
-          </Card>
-        )}
-        {headRows.length > 0 && (
-          <Card title={t('x.dash.heads', { fy })}>
-            <Bars rows={headRows} caption={t('x.dash.heads_note')} empty={t('c.no_data')} />
-          </Card>
-        )}
         {bankCheck?.at && (
           <Card title={t('x.bk.title')}>
+            <Meter
+              value={bankCheck.ok} total={bankCheck.ok + bankCheck.open} label={t('x.dash.bank_meter')} tone={bankCheck.open ? 'warn' : 'ok'}
+              note={t('x.dash.bank_meter_note', { ok: formatNumber(bankCheck.ok), all: formatNumber(bankCheck.ok + bankCheck.open) })}
+            />
             <KeyValues items={[
               [t('x.dash.bank_ok'), <strong key="o" className="num">{formatNumber(bankCheck.ok)}</strong>],
               [t('x.dash.bank_todo'), bankCheck.open ? `${formatNumber(bankCheck.open)} · ${formatINR(bankCheck.open_amount)}` : formatNumber(0)],

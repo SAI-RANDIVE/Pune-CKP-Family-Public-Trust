@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Icon from './icons';
 import { formatINR, formatNumber } from '../../lib/tms/format';
+import { Columns } from './charts';
 
 /**
  * Presentational building blocks of the management system. No hooks and no
@@ -120,38 +121,13 @@ export function TextAreaField({ label, name, hint, optional, ...rest }) {
 /* ---------- charts ---------- */
 
 /**
- * Horizontal bars with the real number printed beside every bar. Series are
- * told apart by their printed name and a fill pattern, never by colour alone.
+ * Bar chart with the bars standing upright. Kept under its old name so every
+ * screen that draws one (reports, schemes, the ledger, polls) uses the same
+ * chart; the drawing itself is in ./charts.
  *   rows: [{ label, values: [{ series, value }] }]
  */
-export function Bars({ rows, caption, money = true, empty }) {
-  const max = Math.max(0, ...rows.flatMap((r) => r.values.map((v) => Math.abs(Number(v.value) || 0))));
-  if (!rows.length || max === 0) return empty ? <p className="muted">{empty}</p> : null;
-  const fmt = money ? formatINR : formatNumber;
-  return (
-    <figure style={{ margin: 0 }}>
-      {caption && <figcaption className="muted" style={{ marginBottom: '0.6rem' }}>{caption}</figcaption>}
-      <div className="tms-bars">
-        {rows.map((row, i) => (
-          <div className="row" key={i}>
-            <div className="lab">{row.label}</div>
-            {row.values.map((v, j) => {
-              const n = Number(v.value) || 0;
-              return (
-                <div className="bar" key={j}>
-                  <span className="ser">{v.series}</span>
-                  <span className="track">
-                    <span className={`fill s${j}`} style={{ width: `${Math.max(0.5, (Math.abs(n) / max) * 72)}%` }} />
-                    <span className="val">{fmt(n)}</span>
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        ))}
-      </div>
-    </figure>
-  );
+export function Bars(props) {
+  return <Columns {...props} />;
 }
 
 /** Loading placeholder blocks. */
