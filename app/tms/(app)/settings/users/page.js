@@ -6,20 +6,25 @@ import { getI18n } from '../../../../../lib/tms/i18n/server';
 import { q } from '../../../../../lib/tms/db';
 import { fmtDateTime } from '../../../../../lib/tms/format';
 import { ROLE_VALUES } from '../../../../../lib/tms/schemas';
-import { createUser, resetUserPassword, updateUser } from '../../../../../lib/tms/actions/settings';
+import { createUser, resetUserPassword, updateUser, updateUserAccess } from '../../../../../lib/tms/actions/settings';
+import { AREAS, FLAGS, LEVELS, areaLevel, flagAllowed } from '../../../../../lib/tms/access';
+import { OFFICER_TITLES } from '../../../../../lib/tms/constants';
 
 export const dynamic = 'force-dynamic';
 
 /** Logins and roles. Super Admin only; every change here needs the e-mailed code. */
 export default async function UsersPage({ searchParams }) {
   const admin = await requireRole('super_admin');
-  const { t } = await getI18n();
+  const { t, lang } = await getI18n();
   const [users, granted] = await Promise.all([
-    q(`select id, name, email, username, role, is_active, last_login_at, locked_until, created_at from admin_users
+    q(`select id, name, email, username, role, is_active, last_login_at, locked_until, created_at, permissions, designation from admin_users
         order by is_active desc, case role when 'super_admin' then 0 when 'admin' then 1 when 'accountant' then 2 else 3 end, name`),
     hasOtpGrant(admin),
   ]);
   const roleOptions = ROLE_VALUES.map((r) => ({ value: r, label: t(`role.${r}`) }));
+  const levelOptions = LEVELS.map((l) => ({ value: l, label: t(`x.acc.level.${l}`) }));
+  const titleOf = (key) => { const o = OFFICER_TITLES.find((x) => x.key === key); return o ? (lang === 'mr' ? o.mr : o.en) : ''; };
+  const titleOptions = OFFICER_TITLES.map((o) => ({ value: o.key, label: lang === 'mr' ? o.mr : o.en }));
 
   return (
     <>
@@ -39,6 +44,7 @@ export default async function UsersPage({ searchParams }) {
               <p style={{ marginBottom: '0.5rem' }}>
                 <Badge tone={u.is_active ? 'ok' : 'error'}>{u.is_active ? t('usr.active') : t('usr.inactive')}</Badge>{' '}
                 <Badge tone="neutral">{t(`role.${u.role}`)}</Badge>{' '}
+                {u.designation && <><Badge tone="info">{titleOf(u.designation)}</Badge>{' '}</>}
                 {u.id === admin.id && <Badge tone="info">{t('usr.you')}</Badge>}
                 {u.locked_until && new Date(u.locked_until) > new Date() && <> <Badge tone="warn">{t('usr.locked')}</Badge></>}
               </p>
@@ -56,6 +62,34 @@ export default async function UsersPage({ searchParams }) {
                   <ConfirmSubmit label={t('c.save_changes')} className="tms-btn" message={t('usr.confirm_change', { name: u.name })} />
                 </form>
               )}
+              {u.id !== admin.id && u.role !== 'super_admin' && (
+                <details className="no-print" style={{ marginTop: '0.75rem' }} open={AREAS.some((a) => areaLevel(u, a) !== 'edit') || FLAGS.some((f) => !flagAllowed(u, f))}>
+                  <summary>{t('x.acc.title')}</summary>
+                  <p className="tms-hint" style={{ margin: '0.25rem 0 0.75rem' }}>{t('x.acc.intro')}</p>
+                  <form action={updateUserAccess}>
+                    <input type="hidden" name="id" value={u.id} />
+                    <SelectField label={t('x.acc.designation')} name="designation" defaultValue={u.designation || ''} options={titleOptions} placeholder={t('x.acc.no_designation')} />
+                    <div className="tms-grid tms-grid--2">
+                      {AREAS.map((area) => (
+                        <SelectField key={area} label={t(`x.acc.area.${area}`)} name={`area_${area}`} defaultValue={areaLevel(u, area)} options={levelOptions} />
+                      ))}
+                    </div>
+                    <fieldset className="tms-field" style={{ border: 0, padding: 0 }}>
+                      <legend className="tms-label">{t('x.acc.sensitive')}</legend>
+                      <div className="tms-choices">
+                        {FLAGS.map((flag) => (
+                          <label key={flag} className="tms-choice">
+                            <input type="checkbox" name={`flag_${flag}`} defaultChecked={flagAllowed(u, flag)} />
+                            <span>{t(`x.acc.flag.${flag}`)}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </fieldset>
+                    <ConfirmSubmit label={t('x.acc.save')} className="tms-btn" message={t('x.acc.confirm', { name: u.name })} />
+                  </form>
+                </details>
+              )}
+              {u.role === 'super_admin' && u.id !== admin.id && <p className="tms-hint" style={{ marginTop: '0.75rem' }}>{t('x.acc.super_note')}</p>}
               <details className="no-print" style={{ marginTop: '0.75rem' }}>
                 <summary>{t('usr.reset')}</summary>
                 <form action={resetUserPassword} style={{ marginTop: '0.5rem' }}>

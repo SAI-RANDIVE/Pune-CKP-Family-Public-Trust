@@ -39,6 +39,12 @@ export function middleware(request) {
       || pathname === '/admin' || pathname.startsWith('/admin/')) {
       return notFound();
     }
+    // Never let a visitor-supplied section header through.
+    if (request.headers.has('x-tms-path')) {
+      const clean = new Headers(request.headers);
+      clean.delete('x-tms-path');
+      return NextResponse.next({ request: { headers: clean } });
+    }
     return NextResponse.next();
   }
 
@@ -48,18 +54,24 @@ export function middleware(request) {
   }
   if (pathname === '/sitemap.xml') return notFound();
 
+  // The guards in lib/tms/auth.js read this to decide which section a request belongs to.
+  // Set here (and only here), so a value sent by a browser is always overwritten.
+  const headers = new Headers(request.headers);
+  headers.set('x-tms-path', pathname);
+  const forward = { request: { headers } };
+
   let response;
   if (pathname.startsWith('/api/')) {
     // Only the management API and the receipt download are served here; the public
     // checkout endpoints belong to the public host.
     if (!pathname.startsWith('/api/tms/') && !pathname.startsWith('/api/receipt/')) return notFound();
-    response = NextResponse.next();
+    response = NextResponse.next(forward);
   } else if (pathname.startsWith('/tms')) {
-    response = NextResponse.next();
+    response = NextResponse.next(forward);
   } else {
     const url = request.nextUrl.clone();
     url.pathname = `/tms${pathname === '/' ? '' : pathname}`;
-    response = NextResponse.rewrite(url);
+    response = NextResponse.rewrite(url, forward);
   }
   response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
   response.headers.set('Cache-Control', 'no-store, max-age=0');

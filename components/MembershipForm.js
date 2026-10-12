@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import MembershipCard from './MembershipCard';
 import EmailVerifyStep from './EmailVerifyStep';
+import MembershipLookup from './MembershipLookup';
 import { FORM_FEE, computeNewMembership } from '../lib/pricing';
 
 const PLANS = [
@@ -11,7 +12,7 @@ const PLANS = [
     title: 'Silver',
     price: '1,000',
     period: '/ year',
-    features: ['1-year membership', 'First term prorated to 30 Jun / 31 Dec', '₹100 one-time form fee applies to all new members'],
+    features: ['1-year membership, renewed for ₹1,000 a year', 'First term runs to the next 30 June or 31 December, so a few extra months are added and charged pro rata (for example ₹250 for 3 months)', '₹100 one-time form fee applies to all new members'],
   },
   {
     type: 'gold',
@@ -56,9 +57,13 @@ export default function MembershipForm() {
   const [error, setError] = useState('');
   const [receipt, setReceipt] = useState(null); // { receiptId, receiptNo, profileUrl }
   const [verificationToken, setVerificationToken] = useState(null);
+  const [lookup, setLookup] = useState(null); // what the trust register said about the typed ID
 
   const breakdown = useMemo(() => {
     if (action === 'renew') {
+      if (lookup?.found && lookup.renewal && lookup.tier === plan) {
+        return { membershipFee: lookup.renewal.amount, registrationFee: 0, totalAmount: lookup.renewal.amount };
+      }
       return {
         membershipFee: plan === 'silver' ? 1000 : plan === 'gold' ? 5000 : 10000,
         registrationFee: 0,
@@ -66,7 +71,44 @@ export default function MembershipForm() {
       };
     }
     return computeNewMembership(plan);
-  }, [action, plan]);
+  }, [action, plan, lookup]);
+
+  // What the total is made of, line by line, so nobody has to ask why Silver is not a round thousand.
+  const niceDate = (iso) => new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+  const { lines, validity } = useMemo(() => {
+    if (action === 'renew') {
+      const term = plan === 'silver' ? '1 more year' : plan === 'gold' ? '5 more years' : 'lifetime';
+      return {
+        lines: [{ label: `${plan.charAt(0).toUpperCase() + plan.slice(1)} renewal`, note: term, amount: breakdown.membershipFee }],
+        validity: lookup?.found && lookup.renewal?.validTill
+          ? `Your membership is valid until ${lookup.validTill ? niceDate(lookup.validTill) : 'today'}. After this renewal: valid until ${niceDate(lookup.renewal.validTill)}.`
+          : 'Check your membership ID below to see the new validity date.',
+      };
+    }
+    if (plan === 'silver') {
+      const extraMonths = Math.max(0, (breakdown.months || 12) - 12);
+      const extra = breakdown.membershipFee - 1000;
+      return {
+        lines: [
+          { label: 'Silver membership, 1 year', note: '12 months', amount: 1000 },
+          ...(extraMonths > 0 ? [{
+            label: `${extraMonths} extra month${extraMonths === 1 ? '' : 's'}`,
+            note: `to bring your membership up to ${niceDate(breakdown.validTill)}, at ₹1,000 a year`,
+            amount: extra,
+          }] : []),
+          { label: 'Form fee', note: 'once, for new members', amount: breakdown.registrationFee },
+        ],
+        validity: `Valid from ${niceDate(breakdown.validFrom)} to ${niceDate(breakdown.validTill)}: ${breakdown.months} months in all. Silver memberships all end on 30 June or 31 December, so the first term is a little longer than a year and you pay only for the extra months.`,
+      };
+    }
+    return {
+      lines: [
+        { label: `${plan === 'gold' ? 'Gold membership, 5 years' : 'Platinum membership, lifetime'}`, amount: breakdown.membershipFee },
+        { label: 'Form fee', note: 'once, for new members', amount: breakdown.registrationFee },
+      ],
+      validity: breakdown.validTill ? `Valid from ${niceDate(breakdown.validFrom)} to ${niceDate(breakdown.validTill)}.` : 'Valid for life from the day you join.',
+    };
+  }, [action, plan, breakdown, lookup]);
 
   function update(field) {
     return (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
@@ -215,18 +257,39 @@ export default function MembershipForm() {
               <p className="text-2xl font-bold text-ink">₹{breakdown.totalAmount.toLocaleString('en-IN')}</p>
             </div>
           </div>
-          <div className="mt-4 space-y-2 text-sm text-ink/70">
-            <div className="flex justify-between"><span>Membership fee</span><span>₹{breakdown.membershipFee.toLocaleString('en-IN')}</span></div>
-            <div className="flex justify-between"><span>Form fee (all tiers)</span><span>₹{breakdown.registrationFee.toLocaleString('en-IN')}</span></div>
-            <div className="flex justify-between font-semibold text-ink"><span>Total payable</span><span>₹{breakdown.totalAmount.toLocaleString('en-IN')}</span></div>
-          </div>
-          <p className="mt-3 text-xs text-ink/60">A one-time form fee of ₹{FORM_FEE.toLocaleString('en-IN')} is charged for every new membership, across Silver, Gold and Platinum tiers.</p>
+          <dl className="mt-4 space-y-2 text-sm text-ink/75">
+            {lines.map((line) => (
+              <div key={line.label} className="flex justify-between gap-4">
+                <dt>{line.label}{line.note && <span className="block text-xs text-ink/55">{line.note}</span>}</dt>
+                <dd className="shrink-0 tabular-nums">₹{line.amount.toLocaleString('en-IN')}</dd>
+              </div>
+            ))}
+            <div className="flex justify-between gap-4 border-t border-saffron-200 pt-2 font-semibold text-ink">
+              <dt>Total payable</dt>
+              <dd className="tabular-nums">₹{breakdown.totalAmount.toLocaleString('en-IN')}</dd>
+            </div>
+          </dl>
+          {validity && <p className="mt-3 rounded-lg bg-saffron-50 px-3 py-2 text-xs font-medium text-ink/80">{validity}</p>}
+          <p className="mt-3 text-xs text-ink/60">
+            {action === 'renew'
+              ? 'A renewal has no form fee. It adds a full term to the end of your present validity, so paying early never loses you any days.'
+              : `A one-time form fee of ₹${FORM_FEE.toLocaleString('en-IN')} is charged for every new membership, across Silver, Gold and Platinum tiers.`}
+          </p>
         </div>
 
         <h3 className="font-display text-xl text-vermilion-700">Your Details</h3>
 
         {action === 'renew' && (
-          <Field label="Membership Number (if known)" value={form.membershipNo} onChange={update('membershipNo')} placeholder="e.g. SM/24/173" />
+          <MembershipLookup
+            value={form.membershipNo}
+            onChange={(v) => setForm((f) => ({ ...f, membershipNo: v }))}
+            result={lookup}
+            onResult={(r) => {
+              setLookup(r);
+              // The register knows the tier; no need to make the member pick it.
+              if (r?.found && ['silver', 'gold', 'platinum'].includes(r.tier)) setPlan(r.tier);
+            }}
+          />
         )}
 
         <div className="grid sm:grid-cols-2 gap-5">
@@ -262,7 +325,7 @@ export default function MembershipForm() {
 
         <button
           type="submit"
-          disabled={status === 'processing' || !verificationToken}
+          disabled={status === 'processing' || !verificationToken || (action === 'renew' && lookup?.found && !lookup.canRenew)}
           className="btn-press w-full rounded-full bg-vermilion-500 text-cream-100 px-7 py-3.5 font-semibold hover:bg-vermilion-600 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {status === 'processing' ? 'Opening secure checkout…' : !verificationToken ? 'Verify your email to continue' : 'Proceed to Payment'}

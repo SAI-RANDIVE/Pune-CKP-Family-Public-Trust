@@ -1,4 +1,4 @@
-import { apiGuard, audit, hasOtpGrant } from '../../../../../lib/tms/auth';
+import { apiGuard, audit, can, hasOtpGrant } from '../../../../../lib/tms/auth';
 import { getI18n } from '../../../../../lib/tms/i18n/server';
 import { currentFy, isFyLabel, todayIso } from '../../../../../lib/tms/format';
 import { REPORT_SLUGS, buildReport } from '../../../../../lib/tms/reports';
@@ -11,6 +11,7 @@ export const dynamic = 'force-dynamic';
 export async function GET(request, { params }) {
   const guard = await apiGuard(request, 'accountant');
   if (guard.response) return guard.response;
+  if (!can(guard.admin, 'export')) return new Response(null, { status: 303, headers: { Location: '/no-access' } });
   if (!REPORT_SLUGS.includes(params.slug)) return new Response('Not found', { status: 404 });
 
   const fyParam = String(new URL(request.url).searchParams.get('fy') || '');

@@ -4,6 +4,7 @@ import Icon from '../../../../components/tms/icons';
 import { PageHead } from '../../../../components/tms/blocks';
 import { Badge, Card, Empty } from '../../../../components/tms/ui';
 import { requireRole } from '../../../../lib/tms/auth';
+import { areaOfTable, canSee } from '../../../../lib/tms/access';
 import { getI18n } from '../../../../lib/tms/i18n/server';
 import { textParam } from '../../../../lib/tms/db';
 import { fmtDate, formatINR, maskPhone, pick } from '../../../../lib/tms/format';
@@ -26,7 +27,7 @@ function Result({ href, title, lines, badge }) {
 
 /** One box for everything: a name in Marathi or English, a phone number, any trust ID or old register number. */
 export default async function SearchPage({ searchParams }) {
-  await requireRole('viewer');
+  const admin = await requireRole('viewer');
   const { t, lang } = await getI18n();
   const term = textParam(searchParams?.q, 80);
 
@@ -34,6 +35,15 @@ export default async function SearchPage({ searchParams }) {
   let numbers = null;
   if (term.length >= 2) {
     [people, numbers] = await Promise.all([searchPeople(term, 20), searchNumbers(term)]);
+    // A section this login cannot open does not appear in its search results either.
+    const sees = (table) => canSee(admin, areaOfTable(table));
+    if (!sees('people')) people = [];
+    numbers.codes = numbers.codes.filter((c) => sees(c.record_table));
+    if (!sees('memberships')) numbers.memberships = [];
+    if (!sees('receipts')) numbers.receipts = [];
+    if (!sees('expenses')) numbers.vouchers = [];
+    if (!sees('fixed_deposits')) numbers.deposits = [];
+    numbers.exact = numbers.exact.filter((e) => sees(e.table));
     if (numbers.exact.length && searchParams?.stay !== '1') {
       const targets = [...new Set(await Promise.all(numbers.exact.map((e) => hrefForRecord(e.table, e.id))))];
       if (targets.length === 1) redirect(targets[0]);

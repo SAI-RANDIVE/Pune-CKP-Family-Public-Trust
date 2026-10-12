@@ -7,6 +7,7 @@ import { checkVerification, consumeVerification } from '../../../../lib/otp';
 import { validatePayer } from '../../../../lib/validate';
 import { clientIp, rateLimit } from '../../../../lib/rateLimit';
 import { logPaymentEvent } from '../../../../lib/paymentEvents';
+import { ensureWebsiteMember, findMembershipById, findMembershipsByEmail, identityMatches, renewalBlock } from '../../../../lib/register';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -58,39 +59,48 @@ export async function POST(req) {
       const label = MEMBERSHIP_LABELS[membershipType];
 
       if (body.membershipAction === 'renew') {
+        // The trust register is the source of truth: any ID on the member's card works,
+        // new (SLV/MEM/0012) or old (SM/24/173).
         const membershipNo = String(body.membershipNo || '').trim();
-        const { rows } = membershipNo
-          ? await pool.query('select * from members where membership_no = $1', [membershipNo])
-          : await pool.query(
-              'select * from members where phone = $1 and email = $2 order by created_at desc limit 1',
-              [payer.phone, payer.email]
-            );
-
-        if (!rows.length) {
-          return bad('We could not find an existing membership matching those details. Check your membership number, or sign up as a new member.');
+        if (!membershipNo) return bad('Please type your membership ID. It is printed on your receipt or membership card.');
+        const found = await findMembershipById(membershipNo);
+        if (!found) {
+          return bad('We could not find a membership with that ID. Please check it, or contact the trust.');
         }
-        const member = rows[0];
-
-        // The email is OTP-verified, so require it to match the member on file.
-        // Without this, knowing someone's membership number would be enough to
-        // read back and extend their membership.
-        if (member.email && member.email.toLowerCase() !== payer.email) {
-          return bad('That membership is registered to a different email address. Please use the email on record, or contact the trust.');
+        // The e-mail is proven by a code; the phone is typed. One of them must be the one on record,
+        // otherwise knowing somebody's ID would be enough to act on their membership.
+        if (!identityMatches(found.person, { email: payer.email, phone: payer.phone })) {
+          return bad('The e-mail address or mobile number does not match the one the trust holds for this membership. Please use the one you gave the trust, or contact the trust to update it.');
         }
-        if (member.membership_type !== membershipType) {
-          return bad(`This membership number is registered as ${MEMBERSHIP_LABELS[member.membership_type]}, not ${label}.`);
+        if (found.membership.tier !== membershipType) {
+          return bad(`This membership is ${MEMBERSHIP_LABELS[found.membership.tier] || found.membership.tier}, not ${label}. Please choose ${MEMBERSHIP_LABELS[found.membership.tier] || 'the right tier'}.`);
         }
+        const blocked = await renewalBlock(found);
+        if (blocked) return bad(blocked.message, 409);
 
-        const calc = computeRenewal(
-          membershipType,
-          member.valid_till ? member.valid_till.toISOString().slice(0, 10) : null
-        );
+        const calc = computeRenewal(membershipType, found.membership.expiryDate || new Date().toISOString().slice(0, 10));
         amount = calc.totalAmount;
         validTill = calc.validTill;
-        memberId = member.id;
+        const client = await pool.connect();
+        try {
+          await client.query('begin');
+          memberId = await ensureWebsiteMember(client, found);
+          await client.query('commit');
+        } catch (err) {
+          await client.query('rollback').catch(() => {});
+          throw err;
+        } finally {
+          client.release();
+        }
         towards = `Membership ${label}, Renew`;
         paymentKind = 'membership_renew';
       } else {
+        // Joining again by mistake is the commonest way a member ends up paying twice.
+        const held = await findMembershipsByEmail(payer.email);
+        if (held.length) {
+          const m = held[0].membership;
+          return bad(`This e-mail address already has a ${MEMBERSHIP_LABELS[m.tier] || m.tier} membership (ID ${m.code}). Please choose "Renew" and type that ID instead of joining again.`, 409);
+        }
         const calc = computeNewMembership(membershipType);
         amount = calc.totalAmount;
         validTill = calc.validTill;
