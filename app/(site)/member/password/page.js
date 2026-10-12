@@ -17,7 +17,7 @@ const ERRORS = {
   current: 'The current password is not correct.',
   match: 'The two new passwords are not the same. Please type them again.',
   same: 'Please choose a password different from the current one.',
-  weak: 'Please use at least 8 characters, with both letters and numbers.',
+  weak: 'Please use at least 6 characters, and not something like 123456.',
   rate: 'Too many attempts. Please wait a few minutes.',
 };
 
@@ -50,12 +50,12 @@ export default async function MemberPasswordPage({ searchParams }) {
           </div>
           <div>
             <label className={label} htmlFor="next">New password</label>
-            <input id="next" name="next" type="password" required minLength={8} maxLength={200} autoComplete="new-password" className={field} />
-            <p className="mt-1.5 text-xs text-ink/60">At least 8 characters, with both letters and numbers.</p>
+            <input id="next" name="next" type="password" required minLength={6} maxLength={200} autoComplete="new-password" className={field} />
+            <p className="mt-1.5 text-xs text-ink/60">At least 6 characters. Anything you will remember: a word, a date, a mix.</p>
           </div>
           <div>
             <label className={label} htmlFor="again">New password, once more</label>
-            <input id="again" name="again" type="password" required minLength={8} maxLength={200} autoComplete="new-password" className={field} />
+            <input id="again" name="again" type="password" required minLength={6} maxLength={200} autoComplete="new-password" className={field} />
           </div>
           <button type="submit" className="btn btn-lg btn-primary w-full">Save the password</button>
         </form>
