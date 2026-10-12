@@ -123,7 +123,7 @@ async function main() {
     }
   }
 
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
+  const pool = new Pool({ connectionString: require('./db-url').databaseUrl(), ssl: { rejectUnauthorized: false } });
   try {
     const { rows } = await pool.query(
       `insert into admin_users (email, name, username, password_hash, role)

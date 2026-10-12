@@ -1,17 +1,13 @@
-import { Yatra_One, Poppins, IBM_Plex_Mono, Mukta } from 'next/font/google';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import JsonLd from '../../components/JsonLd';
 import MotionFx from '../../components/MotionFx';
 import { getSiteUrl } from '../../lib/seo';
 import { TRUST } from '../../lib/siteData';
+import { isDemoMode } from '../../lib/db';
 
-const display = Yatra_One({ subsets: ['latin'], weight: '400', variable: '--font-display', display: 'swap' });
-const body = Poppins({ subsets: ['latin'], weight: ['300', '400', '500', '600', '700'], variable: '--font-body', display: 'swap' });
-const mono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['400', '500'], variable: '--font-mono', display: 'swap', preload: false });
 // Devanagari-capable face for the trust's Marathi motto, names and titles.
 // Not preloaded: it is only fetched when a page actually shows Marathi text.
-const devanagari = Mukta({ subsets: ['devanagari'], weight: ['400', '500', '600', '700'], variable: '--font-devanagari', display: 'swap', preload: false });
 
 export const metadata = {
   metadataBase: new URL(getSiteUrl()),
@@ -19,7 +15,7 @@ export const metadata = {
   description:
     'Pune CKP Family Public Trust: educational, medical, environmental, social and sports support for the Chandraseniya Kayastha Prabhu community and beyond. Join as a member or donate online.',
   applicationName: 'Pune CKP Family Public Trust',
-  icons: { icon: '/logo/logo.png', apple: '/logo/logo.png' },
+  icons: { icon: '/logo/logo.png', apple: '/icons/apple-touch-icon.png' },
   formatDetection: { telephone: false },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 } },
 };
@@ -82,9 +78,10 @@ export default function SiteLayout({ children }) {
   };
 
   return (
-    <div className={`${display.variable} ${body.variable} ${mono.variable} ${devanagari.variable} font-body bg-cream-200 text-ink antialiased min-h-screen`}>
+    <div className="font-body bg-cream-200 text-ink antialiased min-h-screen">
       <JsonLd data={organization} />
       <JsonLd data={website} />
+      {isDemoMode() && <p role="status" className="bg-blue-700 px-4 py-1.5 text-center text-sm font-semibold text-white">Demonstration copy: nothing entered here reaches the trust's real records.</p>}
       <Header />
       <main id="main-content">{children}</main>
       <Footer />

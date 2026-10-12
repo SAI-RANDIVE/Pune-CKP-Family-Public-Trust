@@ -243,12 +243,12 @@ class ShiftRepair(unittest.TestCase):
         self.assertEqual((rec["tier"], rec["period"], rec["remark2023"]), ("Silver", "1 Year", "DECEASED"))
 
     def test_pan_shift(self):
-        cells = {"B": "SM/24/199", "J": "ARPPD3711P", "K": datetime(1988, 6, 9), "L": "NA", "M": "O+ve", "N": "Silver",
+        cells = {"B": "SM/24/999", "J": "ABCPD1234E", "K": datetime(1990, 1, 1), "L": "NA", "M": "O+ve", "N": "Silver",
                  "O": "1Year", "P": "PCFPT", "Q": "New Member year 2024", "S": "Till 31 December 2025"}
         rec, shift = T.map_row(cells, self.HMAP)
         self.assertEqual(shift, "pan")
-        self.assertEqual(rec["pan"], "ARPPD3711P")
-        self.assertEqual(rec["dob"], datetime(1988, 6, 9))
+        self.assertEqual(rec["pan"], "ABCPD1234E")
+        self.assertEqual(rec["dob"], datetime(1990, 1, 1))
         self.assertEqual((rec["blood"], rec["tier"], rec["period"], rec["auth"]), ("O+ve", "Silver", "1Year", "PCFPT"))
         self.assertEqual((rec["validity"], rec["latest"]), ("New Member year 2024", "Till 31 December 2025"))
         self.assertNotIn("remark2023", rec)

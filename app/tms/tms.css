@@ -28,7 +28,7 @@
   min-height: 100vh;
   background: var(--bg);
   color: var(--ink);
-  font-family: var(--tms-latin), var(--tms-deva), 'Noto Sans Devanagari', 'Nirmala UI', system-ui, sans-serif;
+  font-family: 'Inter', 'Mukta', 'Noto Sans Devanagari', 'Nirmala UI', system-ui, sans-serif;
   font-size: 1rem;
   line-height: 1.65;
   -webkit-text-size-adjust: 100%;
@@ -248,6 +248,39 @@ a.tms-stat:hover { background: var(--soft); }
 
 .tms-login { min-height: 100vh; display: grid; place-items: center; padding: 1.5rem 1rem; }
 .tms-login-box { width: 100%; max-width: 30rem; }
+
+/* ---------- shown on every screen while the demo database is in use ---------- */
+.tms-demo { background: #1d4ed8; color: #fff; text-align: center; font-weight: 700; padding: 0.45rem 1rem; font-size: 0.95rem; }
+
+/* ---------- figures that are good or bad news ---------- */
+.tms-stat--ok { border-left-color: var(--ok); background: var(--ok-bg); }
+.tms-stat--bad { border-left-color: var(--danger); background: var(--danger-bg); }
+
+/* ---------- event budget planner ---------- */
+.tms-plan-sum { position: sticky; top: 0; z-index: 20; background: var(--bg); padding: 0.75rem 0; border-bottom: 2px solid var(--line); }
+.tms-plan-sum .tms-stat .v { font-size: 1.5rem; }
+.tms-plan-row { display: grid; gap: 0.5rem 0.75rem; align-items: end; padding: 0.75rem 0; border-bottom: 1px solid var(--line);
+  grid-template-columns: minmax(10rem, 3fr) 5.5rem 8rem auto minmax(7rem, 1fr) auto; }
+.tms-plan-row .tms-input { min-height: 48px; }
+.tms-plan-row .f-head { display: flex; align-items: center; gap: 0.4rem; min-height: 48px; font-weight: 600; white-space: nowrap; }
+.tms-plan-row .f-head input { width: 1.4rem; height: 1.4rem; accent-color: var(--primary); }
+.tms-plan-row .f-total { text-align: right; min-height: 48px; display: flex; align-items: center; justify-content: flex-end; font-size: 1.1rem; }
+.tms-plan-row--fixed, .tms-plan-row--total { grid-template-columns: 1fr auto; align-items: center; }
+.tms-plan-row--total { border-bottom: 0; border-top: 3px double var(--line); margin-top: 0.75rem; font-size: 1.15rem; font-weight: 700; }
+.tms-plan-row .lab { font-weight: 600; }
+@media (max-width: 760px) {
+  .tms-plan-sum { position: static; }
+  .tms-plan-row { grid-template-columns: 1fr 1fr; }
+  .tms-plan-row .f-label { grid-column: 1 / -1; }
+  .tms-plan-row .f-total { justify-content: flex-start; }
+  .tms-plan-row--fixed, .tms-plan-row--total { grid-template-columns: 1fr auto; }
+}
+
+/* ---------- event photographs ---------- */
+.tms-photos { list-style: none; padding: 0; display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); }
+.tms-photos li { display: flex; flex-direction: column; gap: 0.4rem; }
+.tms-photos img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 10px; border: 2px solid var(--line); background: var(--soft); }
+.tms-photos .cap { font-size: 0.9rem; color: var(--muted); }
 
 /* ---------- phones: a short header, because the bottom bar already has Home and Search ---------- */
 @media (max-width: 899px) {

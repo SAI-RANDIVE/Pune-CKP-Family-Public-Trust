@@ -27,7 +27,7 @@ head_as_written,category_code,name_en,name_mr,event_slug,scheme_slug,fund_code,t
 ~Medical|MedAid|Blood test|Aarogya|Arogya,welfare-medical,Welfare: Medical aid,कल्याणकारी: वैद्यकीय मदत,,,,
 ~Gurukul|Students?\b|School|Educat|Scholo?r|Edu Aid|\bStd\b|Shikshan|Sports Equipment|Hearing Aid|Interactive Display|Sanitary Pad,welfare-education,Welfare: Educational aid,कल्याणकारी: शैक्षणिक मदत,,,,
 ~Donation|Dengi|DONATATION|Contribution towards|Sponsor Religious|Vinzai|Ekvira Devasthaan|Devi Ornament|Pooja,welfare-community,Welfare: Donations to social and religious bodies,कल्याणकारी: सामाजिक व धार्मिक देणग्या,,,,
-~Program(me)?|Karykram,programme-events,Programme: Event expenses,कार्यक्रम: कार्यक्रम खर्च,,,,
+~\bProgram(me)?\b|Karykram,programme-events,Programme: Event expenses,कार्यक्रम: कार्यक्रम खर्च,,,,
 ~Sahitya Sammelan|साहित्य सम्मेलन,,Tag only (event / scheme / fund),केवळ कार्यक्रम / योजना / निधी खूण,sahitya-sammelan-2022,,,
 ~4th Anniversary Function,,Tag only (event / scheme / fund),केवळ कार्यक्रम / योजना / निधी खूण,sangeet-rajani-2022,,,
 ~Kirti Printlinks,,Tag only (event / scheme / fund),केवळ कार्यक्रम / योजना / निधी खूण,book-pride-of-ckp,,,

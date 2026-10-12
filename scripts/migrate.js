@@ -30,7 +30,8 @@ async function main() {
   const files = ['schema.sql', ...numbered];
 
   const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
+    // The real database, or the demo one while DATA_MODE=demo (see scripts/db-url.js).
+    connectionString: require('./db-url').databaseUrl(),
     ssl: { rejectUnauthorized: false },
   });
 

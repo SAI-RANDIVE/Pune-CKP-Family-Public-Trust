@@ -1,4 +1,3 @@
-import { Mukta, Inter } from 'next/font/google';
 import './tms.css';
 import { getI18n } from '../../lib/tms/i18n/server';
 
@@ -8,8 +7,6 @@ import { getI18n } from '../../lib/tms/i18n/server';
  * these pages are written without the /tms prefix.
  */
 
-const deva = Mukta({ subsets: ['devanagari', 'latin'], weight: ['400', '500', '600', '700', '800'], variable: '--tms-deva', display: 'swap' });
-const latin = Inter({ subsets: ['latin'], variable: '--tms-latin', display: 'swap' });
 
 export const dynamic = 'force-dynamic';
 
@@ -24,7 +21,7 @@ export const viewport = { width: 'device-width', initialScale: 1 };
 export default async function TmsLayout({ children }) {
   const { lang } = await getI18n();
   return (
-    <div className={`tms ${deva.variable} ${latin.variable}`} lang={lang}>
+    <div className="tms" lang={lang}>
       {/* Base size 18px; the signed-in layout overrides this with the user's A+/A- choice. */}
       <style dangerouslySetInnerHTML={{ __html: 'html{font-size:112.5%}' }} />
       {children}

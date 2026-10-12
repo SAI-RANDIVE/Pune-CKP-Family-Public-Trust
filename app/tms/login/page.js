@@ -3,6 +3,7 @@ import { getCurrentAdmin } from '../../../lib/adminAuth';
 import { getI18n } from '../../../lib/tms/i18n/server';
 import { Alert } from '../../../components/tms/ui';
 import { signIn, setLang } from '../../../lib/tms/actions/session';
+import { isDemoMode } from '../../../lib/db';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'प्रवेश / Sign in' };
@@ -10,7 +11,8 @@ export const metadata = { title: 'प्रवेश / Sign in' };
 const ERRORS = ['invalid', 'locked', 'locked_now', 'rate', 'server'];
 
 export default async function LoginPage({ searchParams }) {
-  const existing = await getCurrentAdmin();
+  // If the database cannot be reached the sign-in form must still appear.
+  const existing = await getCurrentAdmin().catch(() => null);
   if (existing) redirect('/');
 
   const { t, lang } = await getI18n();
@@ -20,6 +22,7 @@ export default async function LoginPage({ searchParams }) {
   return (
     <main className="tms-login">
       <div className="tms-login-box">
+        {isDemoMode() && <div className="tms-demo" role="status" style={{ marginBottom: '1rem', borderRadius: 12 }}>{t('x.demo.ribbon')}</div>}
         <div style={{ textAlign: 'center', marginBottom: '1.25rem' }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo/logo.png" alt="" width="96" height="96" style={{ margin: '0 auto', borderRadius: '50%' }} />
