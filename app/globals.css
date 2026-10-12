@@ -446,6 +446,10 @@ body {
   height: 2.5rem;
 }
 
+/* The name beside the logo stays on one line and inside the bar at every size. */
+.site-brand { line-height: 1.15; }
+.site-header[data-scrolled='true'] .site-brand-sub { font-size: 9px; letter-spacing: 0.18em; }
+
 .nav-link::after {
   content: '';
   position: absolute;

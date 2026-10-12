@@ -22,3 +22,6 @@ docs/old-site-scrape/
 
 # Backups written by scripts/purge-test-data.js (personal data)
 /tmp/
+
+# Third-party admin template kept locally for design reference only
+dashboard-elements/

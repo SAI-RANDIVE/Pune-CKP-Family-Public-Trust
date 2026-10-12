@@ -88,13 +88,13 @@ export default function Header() {
 
       <div className="site-bar backdrop-blur-md">
         <div className="container-page flex h-full items-center justify-between gap-4">
-          <Link href="/" className="flex min-h-[44px] items-center gap-3" aria-label={`${TRUST.name}: home`}>
+          <Link href="/" className="flex min-h-[44px] min-w-0 shrink-0 items-center gap-2.5 sm:gap-3" aria-label={`${TRUST.name}: home`}>
             <span className="site-logo block shrink-0 overflow-hidden rounded-full border-2 border-saffron-300 bg-cream-200">
               <Image src="/logo/logo.png" alt="" width={48} height={48} className="h-full w-full object-cover" priority />
             </span>
-            <span className="leading-tight">
-              <span className="block font-display text-lg text-vermilion-600">Pune CKP Family</span>
-              <span className="block text-[11px] uppercase tracking-[0.2em] text-ink/70">Public Trust</span>
+            <span className="site-brand whitespace-nowrap leading-tight">
+              <span className="block font-display text-base text-vermilion-600 min-[400px]:text-lg">Pune CKP Family</span>
+              <span className="site-brand-sub block text-[10px] uppercase tracking-[0.2em] text-ink/70 min-[400px]:text-[11px]">Public Trust</span>
             </span>
           </Link>
 
@@ -123,7 +123,7 @@ export default function Header() {
             <Link href="/member" className="btn btn-sm btn-outline whitespace-nowrap !gap-1.5 !px-3 !text-[0.8rem]" aria-label="Member sign in">
               <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4" /><path d="M4 20c1-4 4-6 8-6s7 2 8 6" /></svg>
               <span className="hidden min-[520px]:inline">Member sign in</span>
-              <span className="min-[520px]:hidden">Sign in</span>
+              <span className="max-[379px]:hidden min-[520px]:hidden">Sign in</span>
             </Link>
             <Link href="/donate" className="btn btn-sm btn-primary hidden min-[440px]:inline-flex">Donate</Link>
             <button
