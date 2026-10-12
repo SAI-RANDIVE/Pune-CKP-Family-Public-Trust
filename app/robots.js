@@ -13,7 +13,7 @@ export default function robots() {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/api', '/profile', '/tms', '/admin'],
+        disallow: ['/api', '/profile', '/member', '/tms', '/admin'],
       },
     ],
     sitemap: `${siteUrl}/sitemap.xml`,

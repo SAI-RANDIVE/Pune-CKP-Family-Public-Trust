@@ -8,6 +8,12 @@ import JsonLd from '../../../components/JsonLd';
 import { buildMetadata, getSiteUrl } from '../../../lib/seo';
 import { EVENTS, EVENTS_NEWEST_FIRST, EVENT_YEARS, EVENT_CATEGORIES } from '../../../lib/eventsData';
 import { coverOf, VIDEOS } from '../../../lib/galleryData';
+import LiveEventCard from '../../../components/LiveEventCard';
+import LiveRefresh from '../../../components/LiveRefresh';
+import { getPublishedEvents } from '../../../lib/liveEvents';
+
+// Announcements come from the database and must be current the moment a trustee changes one.
+export const dynamic = 'force-dynamic';
 
 export const metadata = buildMetadata({
   title: 'Events & Activities | Pune CKP Family Public Trust',
@@ -22,7 +28,9 @@ function imageFor(event) {
   return video ? { src: video.thumbnail, alt: `Video still: ${video.title}` } : null;
 }
 
-export default function EventsPage() {
+export default async function EventsPage() {
+  const announced = await getPublishedEvents({ forMembers: false, limit: 8 });
+  const today = new Date().toISOString().slice(0, 10);
   const groups = [
     ...EVENT_YEARS.map((year) => ({
       id: `events-${year}`,
@@ -49,6 +57,21 @@ export default function EventsPage() {
   return (
     <>
       <JsonLd data={listSchema} />
+      <LiveRefresh topic="events" />
+      {announced.filter((e) => e.date && e.date >= today).map((e) => (
+        <JsonLd
+          key={e.id}
+          data={{
+            '@context': 'https://schema.org', '@type': 'Event', name: e.name, startDate: e.date,
+            eventStatus: 'https://schema.org/EventScheduled', eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+            ...(e.venue ? { location: { '@type': 'Place', name: e.venue, address: { '@type': 'PostalAddress', addressLocality: 'Pune', addressRegion: 'Maharashtra', addressCountry: 'IN' } } } : {}),
+            ...(e.description ? { description: e.description.slice(0, 300) } : {}),
+            ...(e.banner ? { image: `${getSiteUrl()}${e.banner}` } : {}),
+            organizer: { '@id': `${getSiteUrl()}/#organization` },
+            isAccessibleForFree: e.fee === 0,
+          }}
+        />
+      ))}
       <PageHero
         eyebrow="Events & Activities"
         title="What the family has been doing"
@@ -58,6 +81,26 @@ export default function EventsPage() {
         <Link href="/gaurav-sohala" className="btn btn-primary">Gaurav Sohala</Link>
         <Link href="/gallery" className="btn btn-outline">Photo gallery</Link>
       </PageHero>
+
+      {announced.length > 0 && (
+        <section className="container-page section-y !pb-0" aria-labelledby="announced-heading">
+          <SectionHeading
+            id="announced-heading"
+            eyebrow="From the trust"
+            title="Announcements and coming events"
+            intro="Published by the trustees. This list updates by itself; members register from the members' corner."
+          />
+          <div className="mt-10 grid gap-8 lg:grid-cols-2">
+            {announced.map((event) => (
+              <LiveEventCard key={event.id} event={event}>
+                {event.registrationOpen && (
+                  <Link href="/member/events" className="btn btn-primary">Sign in to register</Link>
+                )}
+              </LiveEventCard>
+            ))}
+          </div>
+        </section>
+      )}
 
       <div className="container-page section-y">
         <EventsBrowser groups={groups} categories={categories} />

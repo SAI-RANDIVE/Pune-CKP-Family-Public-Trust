@@ -3,6 +3,8 @@ import Icon from '../../../components/tms/icons';
 import { I18nProvider } from '../../../components/tms/I18n';
 import { BackButton, SessionWarning } from '../../../components/tms/client';
 import { requireRole, can } from '../../../lib/tms/auth';
+import { canSee, canChange } from '../../../lib/tms/access';
+import { isDemoMode } from '../../../lib/db';
 import { getI18n } from '../../../lib/tms/i18n/server';
 import { setLang, setScale, signOut, stayIn } from '../../../lib/tms/actions/session';
 
@@ -21,13 +23,15 @@ export default async function AppLayout({ children }) {
   const scale = SCALES.includes(admin.text_scale) ? admin.text_scale : 100;
 
   const nav = [
-    { href: '/donations', icon: 'donate', label: t('nav.donations') },
-    { href: '/members', icon: 'people', label: t('nav.members') },
-    { href: '/expenses', icon: 'expense', label: t('nav.expenses') },
-    { href: '/deposits', icon: 'deposit', label: t('nav.deposits') },
-    { href: '/schemes', icon: 'scheme', label: t('nav.schemes') },
-    { href: '/reports', icon: 'report', label: t('nav.reports') },
-    can(admin, 'review') && { href: '/review', icon: 'review', label: t('nav.review') },
+    canSee(admin, 'donations') && { href: '/donations', icon: 'donate', label: t('nav.donations') },
+    canSee(admin, 'members') && { href: '/members', icon: 'people', label: t('nav.members') },
+    canSee(admin, 'expenses') && { href: '/expenses', icon: 'expense', label: t('nav.expenses') },
+    canSee(admin, 'deposits') && { href: '/deposits', icon: 'deposit', label: t('nav.deposits') },
+    canSee(admin, 'schemes') && { href: '/schemes', icon: 'scheme', label: t('nav.schemes') },
+    canSee(admin, 'events') && { href: '/events', icon: 'event', label: t('nav.events') },
+    canSee(admin, 'meetings') && { href: '/meetings', icon: 'review', label: t('x.mt.nav') },
+    canSee(admin, 'reports') && { href: '/reports', icon: 'report', label: t('nav.reports') },
+    can(admin, 'review') && canSee(admin, 'review') && { href: '/review', icon: 'review', label: t('nav.review') },
     { href: '/settings', icon: 'settings', label: t('nav.settings') },
     { href: '/help', icon: 'help', label: t('nav.help') },
   ].filter(Boolean);
@@ -37,6 +41,7 @@ export default async function AppLayout({ children }) {
       <style dangerouslySetInnerHTML={{ __html: `html{font-size:${(112.5 * scale) / 100}%}` }} />
       <a className="tms-skip" href="#main">{t('nav.skip')}</a>
 
+      {isDemoMode() && <div className="tms-demo no-print" role="status">{t('x.demo.ribbon')}</div>}
       <header className="tms-top no-print">
         <div className="tms-top-in">
           <Link href="/" className="tms-brand">
@@ -92,10 +97,12 @@ export default async function AppLayout({ children }) {
 
       <nav className="tms-bottom no-print" aria-label={t('nav.quick')}>
         <Link href="/"><Icon name="home" size="1.7em" />{t('nav.home')}</Link>
-        <Link href={can(admin, 'enterMoney') ? '/donations/new' : '/donations'}><Icon name="donate" size="1.7em" />{t('nav.donation_short')}</Link>
+        {canSee(admin, 'donations')
+          ? <Link href={can(admin, 'enterMoney') && canChange(admin, 'donations') ? '/donations/new' : '/donations'}><Icon name="donate" size="1.7em" />{t('nav.donation_short')}</Link>
+          : <Link href="/events"><Icon name="event" size="1.7em" />{t('nav.events')}</Link>}
         <Link href="/search"><Icon name="search" size="1.7em" />{t('nav.search')}</Link>
-        <Link href="/members"><Icon name="people" size="1.7em" />{t('nav.members')}</Link>
-        <Link href="/reports"><Icon name="report" size="1.7em" />{t('nav.reports')}</Link>
+        {canSee(admin, 'members') ? <Link href="/members"><Icon name="people" size="1.7em" />{t('nav.members')}</Link> : <Link href="/help"><Icon name="help" size="1.7em" />{t('nav.help')}</Link>}
+        {canSee(admin, 'reports') ? <Link href="/reports"><Icon name="report" size="1.7em" />{t('nav.reports')}</Link> : <Link href="/settings"><Icon name="settings" size="1.7em" />{t('nav.settings')}</Link>}
       </nav>
     </I18nProvider>
   );

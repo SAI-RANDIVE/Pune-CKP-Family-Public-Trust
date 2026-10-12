@@ -5,6 +5,7 @@ import { Mandala } from './Motifs';
 import { AREAS_OF_WORK } from '../lib/areasOfWorkData';
 import { BANK_DETAILS } from '../lib/bankDetails';
 import { TRUST } from '../lib/siteData';
+import InstallApp from './InstallApp';
 
 const EXPLORE = [
   { href: '/about', label: 'About the Trust' },
@@ -17,6 +18,8 @@ const EXPLORE = [
   { href: '/gallery', label: 'Photo Gallery' },
   { href: '/gallery/videos', label: 'Video Gallery' },
   { href: '/business-promotion', label: 'Business Promotion' },
+  { href: '/member', label: "Members' Corner" },
+  { href: '/feedback', label: 'Suggestions & Feedback' },
 ];
 
 const SOCIAL_ICONS = {
@@ -129,6 +132,7 @@ export default function Footer() {
             <Link href="/terms" className={`${linkClass} !text-xs`}>Terms</Link>
             <Link href="/privacy" className={`${linkClass} !text-xs`}>Privacy</Link>
             <Link href="/refund-policy" className={`${linkClass} !text-xs`}>Refund policy</Link>
+            <InstallApp variant="link" className={`${linkClass} !text-xs`} />
           </nav>
         </div>
       </div>

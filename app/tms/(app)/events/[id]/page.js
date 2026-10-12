@@ -55,6 +55,7 @@ export default async function EventPage({ params }) {
   return (
     <>
       <PageHead title={name} intro={[e.event_date ? fmtDate(e.event_date) : null, e.fy, e.code].filter(Boolean).join(' · ')} crumbs={[{ href: '/events', label: t('evt.title') }, { label: e.code }]}>
+        <Link href={`/events/${e.event_id}/manage`} className="tms-btn">{t('x.ev.manage')}</Link>
         <PrintButton label={t('c.print')} />
       </PageHead>
       <div style={{ marginBottom: '1.25rem' }}><Alert tone="info" title={t('evt.two_books')}>{t('evt.two_books_body')}</Alert></div>

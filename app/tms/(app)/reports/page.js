@@ -30,6 +30,10 @@ export default async function ReportsPage() {
             <span>{t(`rep.${slug}`)}<small>{t(`rep.d.${slug}`)}</small></span>
           </Link>
         ))}
+        <Link href="/bank" className="tms-tile tms-tile--5">
+          <Icon name="bank" size="2.4rem" />
+          <span>{t('x.bk.title')}<small>{t('x.bk.tile')}</small></span>
+        </Link>
       </nav>
       <div style={{ marginTop: '1.25rem' }}>
         <Alert tone="info">{can(admin, 'export') ? t('rep.export_note') : t('rep.no_export')}</Alert>

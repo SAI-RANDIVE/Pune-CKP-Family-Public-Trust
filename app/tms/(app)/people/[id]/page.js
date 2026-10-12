@@ -3,13 +3,17 @@ import { notFound, redirect } from 'next/navigation';
 import Icon from '../../../../../components/tms/icons';
 import { DataTable, Flash, OriginBadges, PageHead, SourceLink } from '../../../../../components/tms/blocks';
 import { Alert, Badge, Card, KeyValues, Money, SelectField, Stat, TextField } from '../../../../../components/tms/ui';
-import { SubmitButton } from '../../../../../components/tms/client';
+import { ConfirmSubmit, SubmitButton } from '../../../../../components/tms/client';
 import { requireRole, can } from '../../../../../lib/tms/auth';
 import { getI18n } from '../../../../../lib/tms/i18n/server';
 import { isUuid, one, q } from '../../../../../lib/tms/db';
 import { fmtDate, formatINR, formatNumber, pick } from '../../../../../lib/tms/format';
 import { OFFICER_TITLES, TONE_BY_STATUS } from '../../../../../lib/tms/constants';
 import { saveOfficer } from '../../../../../lib/tms/actions/people';
+import { emailMemberStatement, sendMemberLogin } from '../../../../../lib/tms/actions/portal';
+import { linkFamily, unlinkFamily } from '../../../../../lib/tms/actions/community';
+import { RELATIONS, listFamily } from '../../../../../lib/family';
+import { fmtDateTime } from '../../../../../lib/tms/format';
 
 export const dynamic = 'force-dynamic';
 
@@ -56,6 +60,9 @@ export default async function PersonPage({ params, searchParams }) {
 
   const name = pick(lang, p.name_mr, p.name_en);
   const other = lang === 'mr' ? p.name_en : p.name_mr;
+  const portal = await one('select is_active, credentials_sent_at, last_login_at from member_accounts where person_id = $1', [p.id]);
+  const isMember = memberships.length > 0;
+  const [family, photo] = await Promise.all([listFamily(p.id), one('select 1 as ok from person_photos where person_id = $1', [p.id])]);
 
   return (
     <>
@@ -70,6 +77,10 @@ export default async function PersonPage({ params, searchParams }) {
 
       <div className="tms-stack">
         {p.needs_review && <Alert tone="warn">{t('person.needs_review')}</Alert>}
+        {photo && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={`/api/tms/people/photo/${p.id}`} alt="" width="112" height="112" style={{ width: 112, height: 112, borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--line)' }} />
+        )}
 
         <div className="tms-grid tms-grid--3">
           <Stat label={t('person.total_given')} value={formatINR(totals.donated)} note={t('person.total_note', { n: formatNumber(totals.n), total: formatINR(totals.total) })} />
@@ -98,6 +109,69 @@ export default async function PersonPage({ params, searchParams }) {
           ]} />
           {!seeIds && (p.pan || p.aadhaar) && <p className="tms-hint">{t('person.ids_hidden')}</p>}
           <div className="tms-actions no-print" style={{ marginTop: '1rem' }}><SourceLink table="people" id={p.id} /></div>
+        </Card>
+
+        <Card title={`${t('x.fm.title')} (${family.filter((f) => f.status === 'confirmed').length})`}>
+          {family.length === 0 ? <p className="muted">{t('x.fm.none')}</p> : (
+            <ul style={{ listStyle: 'none', padding: 0 }}>
+              {family.map((f) => (
+                <li key={f.id} style={{ padding: '0.5rem 0', borderBottom: '1px solid var(--line)', display: 'flex', flexWrap: 'wrap', gap: '0.6rem', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span>
+                    <Link href={`/people/${f.person.id}`}><strong>{f.person.name}</strong></Link> · {t(`x.fm.r.${f.relation}`)} · <span className="mono">{f.person.membershipCode || f.person.code}</span>{' '}
+                    {f.status === 'pending' ? <Badge tone="warn">{t('x.fm.pending')}</Badge> : <Badge tone="ok">{f.confirmedBy === 'trust' ? t('x.fm.by_trust') : t('x.fm.by_code')}</Badge>}
+                  </span>
+                  {mayEdit && (
+                    <form action={unlinkFamily} className="no-print">
+                      <input type="hidden" name="person_id" value={p.id} />
+                      <input type="hidden" name="link_id" value={f.id} />
+                      <ConfirmSubmit label={t('x.md.remove')} message={t('x.fm.confirm_remove', { name: f.person.name })} className="tms-btn tms-btn--quiet tms-btn--small" />
+                    </form>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+          {mayEdit && (
+            <details className="no-print" style={{ marginTop: '0.75rem' }}>
+              <summary>{t('x.fm.add')}</summary>
+              <form action={linkFamily} style={{ marginTop: '0.5rem', maxWidth: '40rem' }}>
+                <input type="hidden" name="person_id" value={p.id} />
+                <div className="tms-grid tms-grid--2">
+                  <TextField label={t('x.fm.relative')} name="relative" required minLength={3} maxLength={40} placeholder="PCFPT/PER/00045" hint={t('x.fm.relative_hint')} />
+                  <SelectField label={t('x.fm.relation')} name="relation" required defaultValue="spouse" options={RELATIONS.map((r) => ({ value: r, label: t(`x.fm.r.${r}`) }))} />
+                </div>
+                <SubmitButton className="tms-btn tms-btn--secondary">{t('x.fm.link')}</SubmitButton>
+              </form>
+            </details>
+          )}
+        </Card>
+
+        <Card title={t('x.pp.title')}>
+          <p className="muted" style={{ marginBottom: '0.75rem' }}>{t('x.pp.intro')}</p>
+          <KeyValues items={[
+            [t('x.pp.login'), !portal?.credentials_sent_at ? t('x.pt.st.not_sent') : !portal.is_active ? t('x.pt.st.off') : portal.last_login_at ? `${t('x.pt.st.signed_in')} (${fmtDateTime(portal.last_login_at)})` : `${t('x.pt.st.sent')} (${fmtDateTime(portal.credentials_sent_at)})`],
+          ]} />
+          <div className="tms-actions no-print" style={{ marginTop: '1rem' }}>
+            <a className="tms-btn tms-btn--secondary" href={`/api/tms/member-pdf/${p.id}`} target="_blank" rel="noopener"><Icon name="print" />{t('x.pp.statement')}</a>
+            {mayEnter && p.email && (
+              <form action={emailMemberStatement}>
+                <input type="hidden" name="person_id" value={p.id} />
+                <input type="hidden" name="back" value={`/people/${p.id}`} />
+                <ConfirmSubmit label={t('x.pp.email_statement')} icon="mail" className="tms-btn tms-btn--secondary" message={t('x.pp.confirm_statement', { email: p.email })} />
+              </form>
+            )}
+            {can(admin, 'review') && isMember && p.email && (
+              <form action={sendMemberLogin}>
+                <input type="hidden" name="person_id" value={p.id} />
+                <input type="hidden" name="back" value={`/people/${p.id}`} />
+                <ConfirmSubmit
+                  label={portal?.credentials_sent_at ? t('x.pt.resend') : t('x.pt.send')} icon="mail" className="tms-btn tms-btn--secondary"
+                  message={t(portal?.credentials_sent_at ? 'x.pt.confirm_resend' : 'x.pt.confirm_send', { name: p.name_en || p.name_mr, email: p.email })}
+                />
+              </form>
+            )}
+          </div>
+          {!p.email && <p className="tms-hint">{t('x.pp.no_email')}</p>}
         </Card>
 
         <Card title={`${t('person.memberships')} (${memberships.length})`}>

@@ -1,196 +1,247 @@
-# Pune CKP Family Public Trust — Website
+<div align="center">
 
-A Next.js 14 website for the trust: public pages (About, Membership, Donate,
-Contact) plus a working Razorpay checkout that stores members/donations in a
-Neon Postgres database and auto-generates a PDF receipt (styled after the
-trust's existing receipt book) the moment a payment succeeds.
+<img src="public/logo/logo.png" width="120" alt="Pune CKP Family Public Trust emblem" />
 
-Colour palette used throughout: `#F4A62C` (saffron), `#D30000` (vermilion),
-`#FDF5E7` (cream) — see `tailwind.config.js`.
+# Pune CKP Family Public Trust
 
-## 1. What you need before you start
+**समाज हिताय सर्वजनसुखाय**
 
-- **Node.js 18+** on your machine (or wherever you deploy — Vercel is the
-  easiest option for a Next.js site like this).
-- A **Neon** Postgres project — https://neon.tech (free tier is enough to start).
-- A **Razorpay** account with API keys — https://dashboard.razorpay.com/app/keys.
-  Start in **Test mode** until you're ready to go live.
+The trust's public website, its members' corner, and the Trust Management System the trustees work in.
+One project, two sites.
 
-## 2. Install & configure
+<img src="https://github.com/Anmol-Baranwal/Cool-GIFs-For-GitHub/assets/74038190/72903324-cf57-4e90-80a6-ed3c9734e0ed" width="760" alt="" />
+
+`Next.js 14` · `React 18` · `Tailwind CSS` · `PostgreSQL (Neon)` · `Razorpay` · `Nodemailer` · `pdf-lib` · `ExcelJS`
+
+</div>
+
+<img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="100%" alt="" />
+
+## What is in here
+
+| Site | Address | Who it is for |
+|---|---|---|
+| **Public website** | `puneckptrust.in` | Everyone: the trust's story, projects, events, gallery, membership, donations |
+| **Members' corner** | `puneckptrust.in/member` | Members: their membership, payments, statement, family, events, polls |
+| **Trust Management System** | `admin.puneckptrust.in` | Trustees only: the books, members, events, meetings, reports |
+
+The management system does not exist on the public address: every one of its pages and APIs answers
+"not found" there, so nothing on the public site reveals that it is there (`middleware.js`).
+
+<img src="https://user-images.githubusercontent.com/74038190/219923809-b86dc415-a0c2-4a38-bc88-ad6cf06395a8.gif" width="320" align="right" alt="" />
+
+### Public website
+- The trust's history, milestones, projects, 36 past events, the Gaurav Sohala, 37 photo albums and videos
+- Events announced by the trustees appear by themselves, with banner, photographs and a Google Maps link
+- Join or renew online (Razorpay), donate, and get a PDF receipt by e-mail
+- **Renew by membership ID**: any ID on the member's card, new or old, is checked against the register
+  first, so nobody is entered or charged twice
+- Suggestions and feedback form
+- Installable as an app on a phone ("Install the app"), with a friendly offline page
+- SEO: metadata, sitemap, structured data, fast static pages
+
+### Members' corner
+- Sign in with any trust ID, membership ID, old register number or e-mail address
+- Profile and photo, trust ID, every membership held, every payment on record
+- Statement as a PDF on the trust's letterhead
+- **Family group**: add a spouse, children or parents by their ID; the link is made only after they
+  approve it with a code sent to their own e-mail
+- Register for events (with guests), withdraw, see the fee
+- Polls with a live countdown; one vote per member
+
+### Trust Management System
+- Marathi-first, large type, works on a phone; English at one tap
+- Donations and receipts, expenses, members and renewals, fixed deposits, schemes, transfers
+- **Events**: create, publish, banner and photos, registrations, lists as PDF and Excel, messages to
+  everyone registered (e-mail, WhatsApp)
+- **Event budget planner**: head-count, entry fee, lines of income and expense, break-even, PDF and Excel
+- **Meetings register**: minutes, decisions, tasks with owners and dates, minutes as PDF
+- **Polls** and **suggestions inbox**
+- **Bank check**: every expense compared with the bank statement
+- Reports with Excel export, search by any ID, audit log, full backup
+- **Access per login**: the Chairman decides, section by section, who may see or change what
+- Home screen with the year month by month, bank balances, deposits, members, coming events,
+  birthdays, open tasks and a "worth noticing" block worked out from the records
+- Birthday and anniversary greetings e-mailed automatically every morning
+
+<img src="https://user-images.githubusercontent.com/74038190/212284115-f47cd8ff-2ffb-4b04-b5bf-4d1c14c0247f.gif" width="100%" alt="" />
+
+## Run it on your computer
+
+You need Node.js 18 or newer and a PostgreSQL database (a free [Neon](https://neon.tech) project is enough).
 
 ```bash
+git clone https://github.com/SAI-RANDIVE/Pune-CKP-Family-Public-Trust.git
+cd Pune-CKP-Family-Public-Trust
 npm install
-cp .env.example .env.local
-```
-
-Open `.env.local` and fill in:
-
-- `DATABASE_URL` — from Neon: Project → Connection Details → copy the
-  **pooled** connection string (it already includes `sslmode=require`).
-- `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `NEXT_PUBLIC_RAZORPAY_KEY_ID` —
-  from Razorpay → Settings → API Keys.
-- The `NEXT_PUBLIC_TRUST_*` values are already filled in from the trust's
-  current details; edit them if anything changes.
-
-## 3. Create the database tables
-
-```bash
-npm run db:init
-```
-
-This runs `sql/schema.sql` against your Neon database (creates `members`,
-`payments`, `receipt_counters`). You can also just paste that file's contents
-into the Neon SQL editor if you'd rather do it by hand.
-
-## 4. Add the logo
-
-Drop the trust's logo at `public/logo/logo.png`. It's used in the site header
-and embedded into the generated PDF receipts. The site works fine without it
-(a placeholder medallion is shown instead) — but add it before going live.
-
-## 5. Run it locally
-
-```bash
+cp .env.example .env.local        # then fill it in (see below)
+npm run db:migrate                # creates every table (sql/schema.sql, then sql/NNN-*.sql in order)
+npm run admin:create              # asks for name, e-mail, role and password; nothing is hard-coded
 npm run dev
 ```
 
-Visit http://localhost:3000. Use a Razorpay **test card** (e.g. `4111 1111
-1111 1111`, any future expiry, any CVV) to try the full membership/donation →
-payment → receipt flow end-to-end.
-
-## 6. Deploy
-
-The easiest path is **Vercel** (free tier is fine):
-
-1. Push this folder to a GitHub repo.
-2. Import it in Vercel, add the same environment variables from `.env.local`
-   in Vercel's Project Settings → Environment Variables.
-3. Deploy. Point `puneckptrust.org`'s DNS at Vercel when you're ready to
-   switch over from the current WordPress/Marathisrushti site.
-4. Switch Razorpay from Test mode to Live mode keys once you're happy, and
-   re-deploy with the live `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET`.
-
-## Membership pricing — please review with the trustees
-
-The exact proration rules in the original membership notice are a little
-ambiguous in places, so `lib/pricing.js` implements this interpretation
-(and documents it at the top of the file):
-
-- **Silver (₹1,000/yr):** a brand-new signup runs from today to the next
-  30 June or 31 December that's at least 12 months away, billed at
-  ₹1,000⁄12 per month **plus a one-time ₹100 registration fee**. Renewals are
-  a flat ₹1,000, extending the existing expiry by exactly one year.
-- **Gold (₹5,000):** flat fee, valid 5 years from signup/renewal.
-- **Platinum (₹10,000):** flat fee, lifetime, no renewal needed.
-- **Donations:** ₹100–₹10,000 only (per your request); anything larger is
-  pointed to the bank transfer details instead.
-
-If the trustees want different rounding, a different registration fee for
-Gold, or a different proration rule, everything lives in that one file —
-nothing else needs to change.
-
-## How renewals find the right member
-
-On the "Renew Existing Membership" form, someone can enter their membership
-number (e.g. `SM/24/173`) directly, or leave it blank — in which case the
-server looks them up by phone + email matching an existing record. If no
-match is found, they're told to double-check their details or sign up fresh.
-
-## What's intentionally NOT built yet
-
-- **No admin dashboard.** Members/payments live in Neon — query them
-  directly via the Neon SQL editor, or ask to have a simple `/admin` page
-  added next (with password protection) if you'd like one.
-- **No automatic email receipts.** The receipt PDF is offered as an instant
-  download after payment; wiring up an email (e.g. via Resend or SMTP) is a
-  small follow-up if you want it.
-- **Gallery.** The Gallery page is available at `/gallery` and currently
-  features the supplied trust emblem. Add approved event and community photos
-  to `public/gallery/` as they become available.
-- **Full historic word-for-word Marathi text** from the old site (Gaurav
-  Sohala pages, full donation ledger, etc.) wasn't dumped onto every page —
-  the About page carries the trust's story, objectives and a milestones
-  timeline; more detail can be added page by page as needed.
-
-## Project structure
-
-```
-app/                 Pages (App Router) + API routes
-  api/razorpay/       create-order, verify
-  api/receipt/[id]/   PDF download
-  about, membership, donate, contact, gallery, areas-of-work, gaurav-sohala
-components/          UI components (Header, Footer, forms, sections)
-lib/                 db.js, pricing.js, razorpay.js, receipt.js, sequences.js, numberToWords.js
-sql/schema.sql       Neon table definitions
-scripts/init-db.js   Runs schema.sql for you
-```
-
----
-
-## Trust Management System (admin.puneckptrust.in)
-
-One project serves two sites. `middleware.js` decides by host name:
-
-| Host | What it serves |
+| Open | To see |
 |---|---|
-| `puneckptrust.in` | The public website (`app/(site)`). Every management-system address returns "not found" here. |
-| `admin.puneckptrust.in` | The Trust Management System (`app/tms`, `app/api/tms`). Sign-in required, never indexed. |
+| http://localhost:3000 | the public website |
+| http://localhost:3000/member | the members' corner |
+| http://admin.localhost:3000 | the management system |
 
-Locally: public site at `http://localhost:3000`, management system at `http://admin.localhost:3000`.
+### Settings (`.env.local`)
 
-### Set-up
+Never commit `.env.local`. Anything starting `NEXT_PUBLIC_` is visible in the browser.
+
+| Name | What it is |
+|---|---|
+| `DATABASE_URL` | Neon "pooled connection" string |
+| `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `NEXT_PUBLIC_RAZORPAY_KEY_ID`, `RAZORPAY_WEBHOOK_SECRET` | Razorpay keys. `rzp_test_...` keys never count as trust income |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM_NAME` | Mailbox used to send receipts, codes, logins and greetings. Gmail needs an **App Password** |
+| `OTP_PEPPER` | A long random string; salts the one-time codes |
+| `NEXT_PUBLIC_TRUST_*` | Name, registration number, PAN, address, phone, e-mail, website (printed on receipts) |
+| `NEXT_PUBLIC_ADMIN_HOST` | The management system's host, e.g. `admin.puneckptrust.in` |
+| `CRON_SECRET` | A long random string; lets the daily greetings job run |
+| `DATA_MODE` | `live` (the real books) or `demo` (see below) |
+| `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_ID`, `WHATSAPP_TEMPLATE` | Optional: WhatsApp Business (Cloud API) for event messages |
+
+## Demo mode: show the system without touching the real books
+
+<img src="https://user-images.githubusercontent.com/74038190/221352987-68da234d-4d62-4e9d-9d7f-098dc657c2dc.gif" width="260" align="right" alt="" />
 
 ```bash
-npm install
-npm run db:migrate            # applies sql/schema.sql and sql/NNN-*.sql in order (add --dry-run to preview)
-npm run admin:create          # asks for name, e-mail, role and password; nothing is hard-coded
-npm run dev
+npm run demo:create     # makes a separate database (ckp_demo) as a copy of the real one
+npm run demo:status     # says which database the site is using
+npm run demo:drop       # removes the demo database
 ```
 
-Roles: `super_admin` > `admin` > `accountant` > `viewer`. Editing or removing money entries, merging
-people, role changes, exports and backups ask for a six-digit code sent to the user's e-mail, and every
-change is written to the audit log (Settings > Audit log).
+Then put `DATA_MODE=demo` in `.env.local` and restart. While it is set:
 
-### Deploying both hosts (Vercel)
+- the site reads and writes **only** the demo database; the real one is never touched;
+- Aadhaar and PAN numbers in the copy are made up;
+- every e-mail goes to `DEMO_MAIL_TO` (or the trust's own mailbox) instead of the member, marked `[DEMO]`;
+- a blue "demonstration copy" ribbon is shown on every screen.
 
-1. Add `puneckptrust.in`, `www.puneckptrust.in` and `admin.puneckptrust.in` to the same Vercel project.
-2. Set every variable from `.env.example` in Vercel, including `NEXT_PUBLIC_ADMIN_HOST` and `NEXT_PUBLIC_TRUST_WEBSITE`.
-3. Run `npm run db:migrate` against the production database, then `npm run admin:create`.
+To go live, set `DATA_MODE=live` (or remove the line) and restart. Nothing else changes.
 
-### IDs
+## Putting it online
 
-Every record gets one uniform, searchable ID, issued in order and never reused (`lib/ids.js`):
-`SLV/MEM/0001`, `GLD/MEM/0001`, `PLT/MEM/0001` (members), `PCFPT/PER/00001` (people),
-`PCFPT/DON/2026-27/0001` (donations; also `MFE`, `SPN`, `ADV`, `EVF`, `CSR`, `BKS`, `INT`),
-`PCFPT/RCP/2026-27/0001` (receipts), `PCFPT/EXP/...` (expenses), `PCFPT/FD/0001` (deposits).
-Typing any ID, old or new, into Search opens the record.
+Both addresses are served by the **same** deployment. Add both domains to one project.
 
-### Importing the old registers
+### Vercel (recommended)
 
-The original Excel files are never changed. The pipeline in `data-migration/etl` reads them, records the
-file, sheet and row every figure came from, and loads the result in one transaction:
+1. Push this repository to GitHub (done) and sign in at [vercel.com](https://vercel.com) with GitHub.
+2. **Add New > Project**, pick this repository. Framework: Next.js. Leave the build settings as they are.
+3. **Environment Variables**: add every name from the table above (copy the values from your
+   `.env.local`). Set `DATA_MODE=live`, `NEXT_PUBLIC_TRUST_WEBSITE=https://puneckptrust.in`,
+   `NEXT_PUBLIC_ADMIN_HOST=admin.puneckptrust.in`, and a new random `CRON_SECRET`.
+4. **Deploy**.
+5. **Settings > Domains**: add `puneckptrust.in`, `www.puneckptrust.in` and `admin.puneckptrust.in`.
+   Vercel shows the DNS records to create at your domain registrar (an `A` record for the root and
+   `CNAME` records for `www` and `admin`).
+6. In the Razorpay dashboard, point the webhook at `https://puneckptrust.in/api/razorpay/webhook`.
+7. The daily greetings job is already scheduled in `vercel.json` (9:00 am India time); it runs once
+   `CRON_SECRET` is set.
+8. Run `npm run db:migrate` and `npm run admin:create` once from your computer against the live database.
+
+### Netlify
+
+1. Sign in at [netlify.com](https://netlify.com), **Add new site > Import an existing project**, pick
+   this repository. Netlify detects Next.js and uses its Next.js runtime; build command
+   `npm run build`, publish directory `.next`.
+2. **Site configuration > Environment variables**: add the same variables as for Vercel.
+3. **Deploy site**.
+4. **Domain management**: add `puneckptrust.in` as the primary domain and `www.puneckptrust.in` and
+   `admin.puneckptrust.in` as domain aliases, then create the DNS records Netlify shows.
+5. Netlify does not read `vercel.json`. For the daily greetings, create a free job at a scheduler
+   such as cron-job.org that calls `https://puneckptrust.in/api/cron/greetings` once a day with the
+   header `Authorization: Bearer <your CRON_SECRET>`.
+6. Point the Razorpay webhook at `https://puneckptrust.in/api/razorpay/webhook`.
+
+Either way: keep Razorpay on test keys until the trustees decide to take real payments.
+
+<img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="100%" alt="" />
+
+## How things work
+
+### Trust IDs
+Every record gets one uniform, searchable ID, issued in order and never reused (`lib/ids.js`).
+Typing any ID, new or old, into Search opens the record.
+
+| ID | For |
+|---|---|
+| `PCFPT/PER/00001` | a person: this is a member's **trust ID** and never changes |
+| `SLV/MEM/0001`, `GLD/MEM/0001`, `PLT/MEM/0001` | a Silver, Gold or Platinum membership |
+| `PCFPT/DON/2026-27/0001` | a donation (also `MFE` fee, `SPN` sponsorship, `ADV`, `EVF`, `CSR`, `BKS`, `INT`) |
+| `PCFPT/RCP/2026-27/0001` | a receipt |
+| `PCFPT/EXP/2026-27/0001` | an expense voucher |
+| `PCFPT/FD/0001`, `PCFPT/EVT/2026-27/01` | a fixed deposit, an event |
+| `PCFPT/REG/…`, `PCFPT/PLN/…`, `PCFPT/MTG/…`, `PCFPT/POL/…`, `PCFPT/FBK/…` | an event registration, budget plan, meeting, poll, suggestion |
+
+### Membership fees (`lib/pricing.js`)
+| | New member | Renewal |
+|---|---|---|
+| **Silver** | ₹1,000 a year. The first term runs to the next 30 June or 31 December that is at least a year away, so a few extra months are added and charged pro rata (joining in October: 15 months = ₹1,000 + ₹250), plus a ₹100 form fee | ₹1,000 for one more year from the present validity date |
+| **Gold** | ₹5,000 for five years, plus a ₹100 form fee | ₹5,000 for five more years |
+| **Platinum** | ₹10,000 for life, plus a ₹100 form fee | not needed |
+
+The checkout shows this break-up line by line before payment. A renewal opens six months before the
+validity date, and a renewal already paid in the last 24 hours is refused, so a member cannot pay twice.
+
+### Who may see what
+Roles: `super_admin` > `admin` > `accountant` > `viewer`. On top of the role, **Settings > Users**
+lets a Super Admin hide a section from one login, or make it "may look only", and switch off seeing
+Aadhaar/PAN numbers or downloading Excel. Every check is done on the server (`lib/tms/auth.js`,
+`lib/tms/access.js`). Editing or removing money, merging people, changing access, sending messages to
+many people, exports and backups ask for a six-digit code sent to the user's e-mail, and every change
+is written to the audit log.
+
+### Live updates
+Open pages listen to a small update stream (`/api/live/events`, Server-Sent Events) and refresh
+themselves when a trustee publishes an event, adds a photograph or starts a poll. No reload needed.
+
+### Importing the trust's old registers
+The original Excel files are never changed and are **not** in this repository. The pipeline in
+`data-migration/etl` reads them, records the file, sheet and row every figure came from, and loads the
+result in one transaction:
 
 ```bash
-python data-migration/etl/10_extract.py      # workbooks -> staging
-python data-migration/etl/25_people.py       # one record per person; uncertain matches go to review
+python data-migration/etl/10_extract.py          # workbooks -> staging
+python data-migration/etl/25_people.py           # one record per person; doubtful matches go to review
 python data-migration/etl/30_validate.py
 python data-migration/etl/40_load.py --dry-run
-python data-migration/etl/40_load.py         # --rollback <batch> undoes a load
-python data-migration/etl/50_reconcile.py
+python data-migration/etl/40_load.py             # --rollback <batch> undoes a load
+python data-migration/etl/50_reconcile.py        # database vs registers vs bank
+python data-migration/etl/60_verify_expenses.py --save   # every expense against the bank statements
 ```
 
-Reports are written to `data-migration/reports/` (not committed: they contain personal data).
-
-### Photographs
-
-Gallery photos are served from the old website until they are copied locally:
-
+### Useful commands
 ```bash
-node scripts/fetch-old-images.js             # downloads into public/gallery/<album>/image1.jpg ...
+npm run db:migrate          # apply new sql/ files (add --dry-run to preview)
+npm run admin:create        # create or reset a trustee login
+npm run data:purge-test     # remove test payments and codes before going live (--apply to do it)
+npm run fonts:fetch         # re-download the bundled fonts
+npm run icons:make          # remake the app icons from the logo
+node scripts/fetch-old-images.js      # copy the old site's photos into public/gallery
+node scripts/receipt-sample.mjs       # print three sample receipts to check the layout
+python -m pytest data-migration/tests # tests of the import rules
 ```
 
-### Checking the receipt layout
+## Project layout
 
-```bash
-node scripts/receipt-sample.mjs              # writes three sample receipts, including a worst case
 ```
+app/(site)/        public website and members' corner
+app/tms/           Trust Management System (served on the admin host)
+app/api/           checkout, receipts, membership lookup, live updates, cron, and /api/tms for trustees
+components/        public components;  components/tms/ for the management system
+lib/               pricing, receipts, e-mail, WhatsApp, register bridge, family, polls, greetings
+lib/tms/           guards, access rules, actions, reports, translations (Marathi and English)
+sql/               schema.sql and numbered migrations
+scripts/           migrate, create-admin, demo-db, purge-test-data, fonts, icons
+data-migration/    the import pipeline for the old registers, with tests
+middleware.js      decides by host name which site a request gets
+```
+
+<div align="center">
+<img src="https://user-images.githubusercontent.com/74038190/214644145-264f4759-7633-441e-9d67-d8dda9d50d26.gif" width="120" alt="" />
+
+Built for the trustees and members of Pune CKP Family Public Trust · Reg. No. E-8167
+
+</div>
