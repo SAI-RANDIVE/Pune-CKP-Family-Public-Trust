@@ -17,7 +17,9 @@ export const metadata = {
   applicationName: 'Pune CKP Family Public Trust',
   icons: { icon: '/logo/logo.png', apple: '/icons/apple-touch-icon.png' },
   formatDetection: { telephone: false },
-  robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 } },
+  robots: String(process.env.SITE_INDEXING || '').toLowerCase() === 'off'
+    ? { index: false, follow: false }
+    : { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 } },
 };
 
 export const viewport = {

@@ -8,6 +8,10 @@ import { getSiteUrl } from '../lib/seo';
  */
 export default function robots() {
   const siteUrl = getSiteUrl();
+  // During alpha testing on a temporary address nothing should be indexed.
+  if (String(process.env.SITE_INDEXING || '').toLowerCase() === 'off') {
+    return { rules: [{ userAgent: '*', disallow: '/' }] };
+  }
   return {
     rules: [
       {

@@ -25,3 +25,7 @@ docs/old-site-scrape/
 
 # Third-party admin template kept locally for design reference only
 dashboard-elements/
+
+# Ready-to-paste settings for Vercel: real secrets, never commit
+.env.vercel
+.env*.local

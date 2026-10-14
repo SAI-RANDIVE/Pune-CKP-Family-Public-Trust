@@ -125,6 +125,26 @@ To go live, set `DATA_MODE=live` (or remove the line) and restart. Nothing else 
 
 Both addresses are served by the **same** deployment. Add both domains to one project.
 
+### Alpha testing on Vercel, before the domain is bought
+
+No domain is needed to start: Vercel gives every project free `*.vercel.app` addresses, and one
+project can carry two of them, one per site.
+
+1. `npm run env:vercel` writes `.env.vercel` (never committed): every setting the hosted site
+   needs, copied from `.env.local`, with the alpha values filled in
+   (`NEXT_PUBLIC_TRUST_WEBSITE=https://puneckptrust.vercel.app`,
+   `NEXT_PUBLIC_ADMIN_HOST=puneckptrust-admin.vercel.app`, `SITE_INDEXING=off`, `DATA_MODE=demo`,
+   a fresh `CRON_SECRET`).
+2. On vercel.com: **Add New > Project**, import this repository, open **Environment Variables**,
+   and paste the whole of `.env.vercel` into the first **Key** box (Vercel splits it into lines).
+   Then **Deploy**.
+3. **Settings > Domains**: add `puneckptrust.vercel.app` and `puneckptrust-admin.vercel.app`.
+   If a name is taken, pick another, put it in `.env.vercel` (and Vercel) and redeploy.
+4. Public site: `https://puneckptrust.vercel.app`. Management system: `https://puneckptrust-admin.vercel.app`.
+
+When the domain is bought: `node scripts/make-vercel-env.js --domain puneckptrust.in`, paste the
+new values into Vercel, add the three domains below and redeploy.
+
 ### Vercel (recommended)
 
 1. Push this repository to GitHub (done) and sign in at [vercel.com](https://vercel.com) with GitHub.

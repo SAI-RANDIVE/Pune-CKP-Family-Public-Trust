@@ -11,6 +11,7 @@
     "db:migrate": "node scripts/migrate.js",
     "admin:create": "node scripts/create-admin.js",
     "demo:create": "node scripts/demo-db.js create",
+    "env:vercel": "node scripts/make-vercel-env.js",
     "demo:status": "node scripts/demo-db.js status",
     "demo:drop": "node scripts/demo-db.js drop",
     "fonts:fetch": "node scripts/fetch-fonts.js",
